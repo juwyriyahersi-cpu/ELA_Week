@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELA Week — Grade 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #5BC8E8;
+    --sky-dark: #3AAECF;
+    --green: #6CC04A;
+    --green-dark: #3A8A1E;
+    --purple: #7C5CBF;
+    --purple-light: #E8E0FF;
+    --blue: #185FA5;
+    --blue-light: #DDEEFF;
+    --teal: #0D9A8A;
+    --teal-light: #D6F5EC;
+    --yellow: #F5A623;
+    --pink: #E8497A;
+    --orange: #F47B20;
+    --white: #FFFFFF;
+    --dark: #1A1A2E;
+    --card-radius: 24px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--sky);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SKY BACKGROUND */
+  .sky-wrap {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E4F5 60%, #6CC04A 60%, #3A8A1E 100%);
+    z-index: 0;
+  }
+
+  /* CLOUDS */
+  .cloud {
+    position: absolute;
+    background: #fff;
+    border-radius: 50px;
+    opacity: 0.9;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+  }
+  .cloud-1 { width: 120px; height: 40px; top: 6%; left: -140px; animation-duration: 28s; animation-delay: 0s; }
+  .cloud-1::before { width: 60px; height: 55px; top: -28px; left: 15px; }
+  .cloud-1::after  { width: 45px; height: 45px; top: -22px; left: 52px; }
+  .cloud-2 { width: 90px; height: 30px; top: 12%; left: -110px; animation-duration: 36s; animation-delay: -12s; }
+  .cloud-2::before { width: 45px; height: 42px; top: -22px; left: 10px; }
+  .cloud-2::after  { width: 36px; height: 36px; top: -16px; left: 40px; }
+  .cloud-3 { width: 160px; height: 50px; top: 4%; left: -180px; animation-duration: 44s; animation-delay: -22s; }
+  .cloud-3::before { width: 75px; height: 65px; top: -35px; left: 20px; }
+  .cloud-3::after  { width: 60px; height: 55px; top: -28px; left: 72px; }
+  @keyframes drift { from { left: -200px; } to { left: 110%; } }
+
+  /* HILLS */
+  .hill {
+    position: fixed;
+    border-radius: 50%;
+    z-index: 0;
+  }
+  .hill-1 { width: 140vw; height: 60vw; bottom: -30vw; left: -20vw; background: var(--green); }
+  .hill-2 { width: 120vw; height: 50vw; bottom: -28vw; right: -20vw; background: var(--green-dark); }
+
+  /* MAIN CONTENT */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 0 16px 60px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 40px 0 24px;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.35);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 30px;
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .hero-card {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-radius: var(--card-radius);
+    padding: 28px 24px 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 2px solid rgba(255,255,255,0.8);
+  }
+  .hero-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(36px, 8vw, 56px);
+    font-weight: 800;
+    color: var(--purple);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .hero-sub {
+    font-size: 15px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .day-pills {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .day-pill {
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.3px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    opacity: 0.7;
+  }
+  .day-pill:hover { transform: scale(1.06); opacity: 0.9; }
+  .day-pill.active-tab { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 3px rgba(255,255,255,0.8); }
+  .day-card { transition: opacity 0.25s, transform 0.25s; }
+  .pill-mon { background: var(--purple); }
+  .pill-tue { background: var(--blue); }
+  .pill-wed { background: var(--teal); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    margin: 32px 0 14px;
+    text-align: center;
+  }
+
+  /* ACTIVITY CARDS */
+  .activity-card {
+    border-radius: var(--card-radius);
+    padding: 22px 20px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .activity-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+  .activity-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+  }
+  .card-mon { background: var(--purple-light); } .card-mon::before { background: var(--purple); }
+  .card-tue { background: var(--blue-light); }   .card-tue::before { background: var(--blue); }
+  .card-wed { background: var(--teal-light); }   .card-wed::before { background: var(--teal); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 54px; height: 54px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .icon-mon { background: var(--purple); }
+  .icon-tue { background: var(--blue); }
+  .icon-wed { background: var(--teal); }
+
+  .card-meta { flex: 1; }
+  .card-day {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .meta-mon { color: var(--purple); }
+  .meta-tue { color: var(--blue); }
+  .meta-wed { color: var(--teal); }
+
+  .card-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 13.5px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .card-steps {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .step-chip {
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .chip-mon { background: var(--purple); }
+  .chip-tue { background: var(--blue); }
+  .chip-wed { background: var(--teal); }
+
+  /* OPEN BUTTON */
+  .open-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Baloo 2', cursive;
+    font-size: 17px;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s, filter 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .open-btn:hover { filter: brightness(1.08); transform: scale(1.02); }
+  .open-btn:active { transform: scale(0.98); }
+  .btn-mon { background: linear-gradient(135deg, #9B7FD4, var(--purple)); }
+  .btn-tue { background: linear-gradient(135deg, #2980D4, var(--blue)); }
+  .btn-wed { background: linear-gradient(135deg, #14C4AE, var(--teal)); }
+  .btn-arrow { font-size: 20px; transition: transform 0.2s; }
+  .open-btn:hover .btn-arrow { transform: translateX(4px); }
+
+  /* NOTE under button */
+  .card-note {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+  }
+
+  /* TEACHER SECTION */
+  .teacher-card {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-radius: var(--card-radius);
+    padding: 22px 20px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    border: 2px solid rgba(255,255,255,0.8);
+  }
+  .teacher-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .teacher-icon {
+    width: 54px; height: 54px;
+    border-radius: 16px;
+    background: var(--dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .teacher-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark);
+  }
+  .teacher-sub {
+    font-size: 12px;
+    color: #888;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .teacher-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .teacher-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: transform 0.15s, filter 0.15s;
+  }
+  .teacher-link:hover { filter: brightness(1.07); transform: scale(1.02); }
+  .link-dash { background: #26215C; color: #fff; }
+  .link-pptx { background: #7C3FE4; color: #fff; }
+  .teacher-link-icon { font-size: 18px; }
+
+  /* TIPS */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .tip-item {
+    background: #F5F3FF;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #444;
+    font-weight: 600;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 24px 0 0;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+  }
+  .footer-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+  .fdot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* HOW TO SHARE MODAL */
+  .share-section {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-radius: var(--card-radius);
+    padding: 22px 20px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    border: 2px solid rgba(255,255,255,0.8);
+    margin-bottom: 0;
+  }
+  .share-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .share-desc {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .step-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--purple);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 13px;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.55;
+  }
+  .step-text strong { color: var(--purple); }
+  .netlify-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 13px;
+    background: linear-gradient(135deg, #00AD9F, #00C7B7);
+    border-radius: 12px;
+    text-align: center;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    transition: filter 0.15s, transform 0.15s;
+  }
+  .netlify-btn:hover { filter: brightness(1.08); transform: translateY(-2px); }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .fade-up:nth-child(2) { animation-delay: 0.12s; }
+  .fade-up:nth-child(3) { animation-delay: 0.19s; }
+  .fade-up:nth-child(4) { animation-delay: 0.26s; }
+  .fade-up:nth-child(5) { animation-delay: 0.33s; }
+  .fade-up:nth-child(6) { animation-delay: 0.40s; }
+
+  @media(max-width: 420px) {
+    .teacher-links { grid-template-columns: 1fr; }
+    .tips-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="sky-wrap">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+  <div class="hill hill-1"></div>
+  <div class="hill hill-2"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- HERO -->
+  <div class="hero fade-up">
+    <div class="hero-badge">📚 Grade 1</div>
+    <div class="hero-card">
+      <div class="hero-title">ELA Week Grade 1</div>
+      <div class="hero-sub">Students are invited to join a week full of educational games that help them create and produce work reflecting their learning throughout the year in a fun and engaging way.</div>
+      <div class="day-pills">
+        <button class="day-pill pill-mon" id="tab-mon" onclick="showDay('mon')">📅 Monday</button>
+        <button class="day-pill pill-tue" id="tab-tue" onclick="showDay('tue')">📅 Tuesday</button>
+        <button class="day-pill pill-wed" id="tab-wed" onclick="showDay('wed')">📅 Wednesday</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT ACTIVITIES -->
+  <div class="section-title">🎮 Student Activities</div>
+
+  <!-- MONDAY -->
+  <div class="activity-card card-mon fade-up day-card" id="day-card-mon">
+    <div class="card-header">
+      <div class="card-icon icon-mon">🏆</div>
+      <div class="card-meta">
+        <div class="card-day meta-mon">Monday</div>
+        <div class="card-title">Grammar Treasure Hunt</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Type your name, open the treasure chest and sort 16 words into Verb, Noun, Proper Noun or Adjective. Collect points and see your final score!
+    </div>
+    <div class="card-steps">
+      <span class="step-chip chip-mon">Type your name</span>
+      <span class="step-chip chip-mon">Open the chest</span>
+      <span class="step-chip chip-mon">Sort 16 words</span>
+      <span class="step-chip chip-mon">See your score</span>
+    </div>
+    <a href="grammar_treasure_hunt_final.html" class="open-btn btn-mon" target="_blank">
+      Open Monday Activity <span class="btn-arrow">→</span>
+    </a>
+    <div class="card-note">Works on any device • No login needed</div>
+  </div>
+
+  <!-- TUESDAY -->
+  <div class="activity-card card-tue fade-up day-card" id="day-card-tue">
+    <div class="card-header">
+      <div class="card-icon icon-tue">🎡</div>
+      <div class="card-meta">
+        <div class="card-day meta-tue">Tuesday</div>
+        <div class="card-title">Word Anchor Chart</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Spin the wheel to get a word, draw a picture for it, then sort it into the right grammar category and explain your thinking. Complete 5 words!
+    </div>
+    <div class="card-steps">
+      <span class="step-chip chip-tue">Spin the wheel</span>
+      <span class="step-chip chip-tue">Draw the word</span>
+      <span class="step-chip chip-tue">Sort & explain</span>
+      <span class="step-chip chip-tue">Build your chart</span>
+    </div>
+    <a href="tuesday_anchor_chart_v2.html" class="open-btn btn-tue" target="_blank">
+      Open Tuesday Activity <span class="btn-arrow">→</span>
+    </a>
+    <div class="card-note">Works on any device • No login needed</div>
+  </div>
+
+  <!-- WEDNESDAY -->
+  <div class="activity-card card-wed fade-up day-card" id="day-card-wed">
+    <div class="card-header">
+      <div class="card-icon icon-wed">📖</div>
+      <div class="card-meta">
+        <div class="card-day meta-wed">Wednesday</div>
+        <div class="card-title">My Picture Story Book</div>
+      </div>
+    </div>
+    <div class="card-desc">
+      Create your own 7-page illustrated story! Pick characters, colour them, choose a scene, drag everything onto the page and write your story. Then read it as a real flipbook!
+    </div>
+    <div class="card-steps">
+      <span class="step-chip chip-wed">Pick characters</span>
+      <span class="step-chip chip-wed">Choose a scene</span>
+      <span class="step-chip chip-wed">Write your story</span>
+      <span class="step-chip chip-wed">Read your book!</span>
+    </div>
+    <a href="wednesday_flipbook_v2.html" class="open-btn btn-wed" target="_blank">
+      Open Wednesday Activity <span class="btn-arrow">→</span>
+    </a>
+    <div class="card-note">Works on any device • No login needed</div>
+  </div>
+
+  <!-- TEACHER SECTION -->
+  <div class="section-title">👩‍🏫 Teacher Resources</div>
+
+  <div class="teacher-card fade-up">
+    <div class="teacher-header">
+      <div class="teacher-icon">📊</div>
+      <div>
+        <div class="teacher-sub">For teachers only</div>
+        <div class="teacher-title">Resources & Dashboard</div>
+      </div>
+    </div>
+    <div class="teacher-links">
+      <a href="ela_teacher_dashboard.html" class="teacher-link link-dash" target="_blank">
+        <span class="teacher-link-icon">📈</span>
+        Teacher Dashboard
+      </a>
+      <a href="https://www.canva.com/design/DAHG0GBBk00/QT4ztvsKiv3X1dxBoHfDeA/view" class="teacher-link link-pptx" target="_blank">
+        <span class="teacher-link-icon">📑</span>
+        View Teacher Guide
+      </a>
+    </div>
+    <div class="tips-grid">
+      <div class="tip-item"><span class="tip-icon">⏱️</span>Each activity fits in a 20-minute lesson</div>
+      <div class="tip-item"><span class="tip-icon">📱</span>Works on iPad, Android tablet or laptop</div>
+      <div class="tip-item"><span class="tip-icon">📡</span>Results appear live in your dashboard</div>
+      <div class="tip-item"><span class="tip-icon">🔗</span>No student login needed — just type name</div>
+      <div class="tip-item"><span class="tip-icon">💬</span>Share activity links via Seesaw or email</div>
+      <div class="tip-item"><span class="tip-icon">📴</span>Offline? Send word list via Seesaw</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer fade-up">
+    <div class="footer-dots">
+      <div class="fdot" style="background:var(--purple);"></div>
+      <div class="fdot" style="background:var(--blue);"></div>
+      <div class="fdot" style="background:var(--teal);"></div>
+      <div class="fdot" style="background:var(--yellow);"></div>
+      <div class="fdot" style="background:var(--pink);"></div>
+      <div class="fdot" style="background:var(--orange);"></div>
+      <div class="fdot" style="background:var(--green);"></div>
+    </div>
+    Grade 1 ELA Week<br>
+    All activities built for distance learning • Google Sheets dashboard included
+  </div>
+
+</div>
+<script>
+  const DAYS = ['mon', 'tue', 'wed'];
+  let activeDay = null;
+
+  function showDay(day) {
+    if (activeDay === day) {
+      // clicking active tab again → show all
+      activeDay = null;
+      DAYS.forEach(d => {
+        document.getElementById('day-card-' + d).style.display = 'block';
+        document.getElementById('tab-' + d).classList.remove('active-tab');
+      });
+    } else {
+      activeDay = day;
+      DAYS.forEach(d => {
+        document.getElementById('day-card-' + d).style.display = d === day ? 'block' : 'none';
+        document.getElementById('tab-' + d).classList.toggle('active-tab', d === day);
+      });
+      document.getElementById('day-card-' + day).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+</script>
+</body>
+</html>

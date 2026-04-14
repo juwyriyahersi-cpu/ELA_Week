@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELA Week — Teacher Dashboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f4f3ff; min-height: 100vh; padding: 24px 16px; }
+.wrap { max-width: 900px; margin: 0 auto; }
+.dashboard-header { background: #534AB7; border-radius: 20px; padding: 28px 32px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.dashboard-header h1 { font-size: 32px; font-weight: bold; color: #fff; letter-spacing: 2px; }
+.dashboard-header .subtitle { font-size: 14px; color: #CECBF6; margin-top: 4px; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.refresh-btn { background: #fff; color: #534AB7; border: none; border-radius: 12px; padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; font-family: Arial, sans-serif; }
+.refresh-btn:hover { background: #EEEDFE; }
+.last-updated { font-size: 11px; color: #CECBF6; }
+.summary-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
+.sum-card { border-radius: 16px; padding: 20px; }
+.sum-card.mon { background: #7F77DD; }
+.sum-card.tue { background: #185FA5; }
+.sum-card.wed { background: #3B6D11; }
+.sum-card .day-label { font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.sum-card .big-num { font-size: 36px; font-weight: bold; color: #fff; line-height: 1; }
+.sum-card .sub-label { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; margin-bottom: 12px; }
+.sum-card .stats-row { display: flex; gap: 8px; }
+.sum-card .stat { background: rgba(255,255,255,0.18); border-radius: 10px; padding: 8px; text-align: center; flex: 1; }
+.sum-card .stat-val { font-size: 15px; font-weight: bold; color: #fff; }
+.sum-card .stat-lbl { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.chart-section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+.chart-section h2 { font-size: 15px; font-weight: bold; color: #534AB7; margin-bottom: 20px; }
+.chart-area { display: flex; align-items: flex-end; gap: 40px; height: 140px; padding: 0 40px; }
+.chart-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 6px; }
+.chart-bar-wrap { width: 100%; display: flex; justify-content: center; align-items: flex-end; flex: 1; }
+.chart-bar { width: 70%; border-radius: 8px 8px 0 0; min-height: 4px; transition: height 1s ease; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; }
+.chart-bar.mon { background: #7F77DD; }
+.chart-bar.tue { background: #185FA5; }
+.chart-bar.wed { background: #3B6D11; }
+.chart-val { font-size: 12px; font-weight: bold; color: #fff; }
+.chart-lbl { font-size: 13px; font-weight: bold; color: #888; }
+.day-section { background: #fff; border-radius: 16px; padding: 22px 24px; margin-bottom: 16px; border-left: 6px solid #ccc; }
+.day-section.mon { border-left-color: #7F77DD; }
+.day-section.tue { border-left-color: #185FA5; }
+.day-section.wed { border-left-color: #3B6D11; }
+.day-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.day-section h2 { font-size: 17px; font-weight: bold; }
+.day-section.mon h2 { color: #534AB7; }
+.day-section.tue h2 { color: #0C447C; }
+.day-section.wed h2 { color: #27500A; }
+.day-badge { font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 20px; }
+.day-badge.mon { background: #EEEDFE; color: #534AB7; }
+.day-badge.tue { background: #E6F1FB; color: #0C447C; }
+.day-badge.wed { background: #EAF3DE; color: #27500A; }
+.day-meta { font-size: 13px; color: #aaa; margin-bottom: 16px; }
+.student-list { display: flex; flex-direction: column; gap: 10px; }
+.student-row { display: flex; align-items: center; gap: 12px; }
+.rank { font-size: 16px; min-width: 28px; text-align: center; }
+.student-name { font-size: 14px; font-weight: bold; color: #333; min-width: 120px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-wrap { flex: 1; background: #f4f4f4; border-radius: 20px; height: 30px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; padding-left: 12px; font-size: 13px; font-weight: bold; color: #fff; transition: width 1s ease; white-space: nowrap; }
+.bar-fill.mon { background: #7F77DD; }
+.bar-fill.tue { background: #185FA5; }
+.bar-fill.wed { background: #3B6D11; }
+.pct-badge { font-size: 13px; font-weight: bold; min-width: 44px; text-align: right; }
+.pct-badge.mon { color: #534AB7; }
+.pct-badge.tue { color: #0C447C; }
+.pct-badge.wed { color: #27500A; }
+.time-lbl { font-size: 11px; color: #bbb; min-width: 55px; text-align: right; }
+.empty-state { text-align: center; padding: 30px 20px; color: #ccc; font-size: 14px; }
+.status-bar { background: #EEEDFE; border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #534AB7; margin-bottom: 16px; text-align: center; }
+.status-bar.error { background: #FCEBEB; color: #791F1F; }
+.status-bar.local { background: #E6F1FB; color: #0C447C; }
+.work-toggle { font-size: 11px; background: #f0eeff; border: 1px solid #ccc; border-radius: 6px; padding: 3px 8px; cursor: pointer; margin-left: 8px; white-space: nowrap; }
+.work-toggle:hover { background: #EEEDFE; }
+.work-detail { display: none; margin-top: 8px; background: #fafafa; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #333; border: 1px solid #e8e8e8; width: 100%; }
+.work-detail.open { display: block; }
+.word-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.word-chip { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 4px 8px; font-size: 11px; }
+.word-chip img { width: 36px; height: 22px; border-radius: 4px; object-fit: cover; }
+.word-chip.correct { border-color: #97C459; background: #f0faec; }
+.word-chip.wrong { border-color: #F09595; background: #fff5f5; }
+.story-pages { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+.story-page { background: #fff; border: 1px solid #ddd; border-radius: 7px; padding: 5px 10px; font-size: 12px; color: #333; }
+.story-page strong { color: #534AB7; }
+.student-row-wrap { display: flex; flex-direction: column; width: 100%; margin-bottom: 10px; }
+@media(max-width:600px){ .summary-row{grid-template-columns:1fr;} .student-name{min-width:80px;max-width:90px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="dashboard-header">
+    <div>
+      <h1>ELA WEEK</h1>
+      <div class="subtitle">Teacher Results Dashboard — Grammar Treasure Hunt</div>
+    </div>
+    <div class="header-right">
+      <button class="refresh-btn" onclick="loadData()">Refresh Results</button>
+      <div class="last-updated" id="lastUpdated">Loading...</div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Loading student results...</div>
+
+  <div class="summary-row">
+    <div class="sum-card mon">
+      <div class="day-label">Monday</div>
+      <div class="big-num" id="mon-count">0</div>
+      <div class="sub-label">students completed</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val" id="mon-avg">—</div><div class="stat-lbl">Avg Score</div></div>
+        <div class="stat"><div class="stat-val" id="mon-top">—</div><div class="stat-lbl">Top Score</div></div>
+        <div class="stat"><div class="stat-val" id="mon-pct">—</div><div class="stat-lbl">Avg %</div></div>
+      </div>
+    </div>
+    <div class="sum-card tue">
+      <div class="day-label">Tuesday</div>
+      <div class="big-num" id="tue-count">0</div>
+      <div class="sub-label">students completed</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val" id="tue-avg">—</div><div class="stat-lbl">Avg Score</div></div>
+        <div class="stat"><div class="stat-val" id="tue-top">—</div><div class="stat-lbl">Top Score</div></div>
+        <div class="stat"><div class="stat-val" id="tue-pct">—</div><div class="stat-lbl">Avg %</div></div>
+      </div>
+    </div>
+    <div class="sum-card wed">
+      <div class="day-label">Wednesday</div>
+      <div class="big-num" id="wed-count">0</div>
+      <div class="sub-label">students completed</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val" id="wed-avg">—</div><div class="stat-lbl">Avg Score</div></div>
+        <div class="stat"><div class="stat-val" id="wed-top">—</div><div class="stat-lbl">Top Score</div></div>
+        <div class="stat"><div class="stat-val" id="wed-pct">—</div><div class="stat-lbl">Avg %</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <h2>Class average score by day (out of 16)</h2>
+    <div class="chart-area">
+      <div class="chart-col">
+        <div class="chart-bar-wrap"><div class="chart-bar mon" id="chart-mon" style="height:4px"><span class="chart-val" id="chart-mon-val"></span></div></div>
+        <div class="chart-lbl">Monday</div>
+      </div>
+      <div class="chart-col">
+        <div class="chart-bar-wrap"><div class="chart-bar tue" id="chart-tue" style="height:4px"><span class="chart-val" id="chart-tue-val"></span></div></div>
+        <div class="chart-lbl">Tuesday</div>
+      </div>
+      <div class="chart-col">
+        <div class="chart-bar-wrap"><div class="chart-bar wed" id="chart-wed" style="height:4px"><span class="chart-val" id="chart-wed-val"></span></div></div>
+        <div class="chart-lbl">Wednesday</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-section mon">
+    <div class="day-section-header">
+      <h2>Monday — Student Results</h2>
+      <span class="day-badge mon" id="mon-badge">0 students</span>
+    </div>
+    <div class="day-meta" id="mon-meta"></div>
+    <div class="student-list" id="mon-list"><div class="empty-state">No results yet</div></div>
+  </div>
+
+  <div class="day-section tue">
+    <div class="day-section-header">
+      <h2>Tuesday — Student Results</h2>
+      <span class="day-badge tue" id="tue-badge">0 students</span>
+    </div>
+    <div class="day-meta" id="tue-meta"></div>
+    <div class="student-list" id="tue-list"><div class="empty-state">No results yet</div></div>
+  </div>
+
+  <div class="day-section wed">
+    <div class="day-section-header">
+      <h2>Wednesday — Student Results</h2>
+      <span class="day-badge wed" id="wed-badge">0 students</span>
+    </div>
+    <div class="day-meta" id="wed-meta"></div>
+    <div class="student-list" id="wed-list"><div class="empty-state">No results yet</div></div>
+  </div>
+</div>
+
+<script>
+const GET_URL = 'https://script.google.com/macros/s/AKfycbzcjWJYwlvJoJ_ozvthknLMeeWTcUyAKE_LuIxepopGIFI4I915cJBsGGuXC3GIQZYtNA/exec';
+const DAYS = ['Monday','Tuesday','Wednesday'];
+const DC = {Monday:'mon',Tuesday:'tue',Wednesday:'wed'};
+const medals = ['🥇','🥈','🥉'];
+
+function gid(id){ return document.getElementById(id); }
+
+/* ── localStorage helpers ─────────────────────────── */
+function getLocalData() {
+  try {
+    const raw = localStorage.getItem('ela_week_results');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function mergeWithLocal(sheetsData) {
+  const local = getLocalData();
+  if (!local) return sheetsData;
+  const merged = {};
+  DAYS.forEach(day => {
+    const fromSheets = sheetsData[day] || [];
+    const fromLocal  = local[day] || [];
+    // Start with sheets data, enrich with local details where name matches
+    const result = fromSheets.map(s => {
+      const lm = fromLocal.find(l => l.name === s.name);
+      return lm ? Object.assign({}, lm, {score: s.score, total: s.total, time: s.time || lm.time}) : s;
+    });
+    // Add local-only entries (submitted but not yet in Sheets)
+    fromLocal.forEach(l => {
+      if (!result.find(r => r.name === l.name)) result.push(l);
+    });
+    merged[day] = result;
+  });
+  return merged;
+}
+
+/* ── Work detail renderer ─────────────────────────── */
+function buildWorkDetail(s, day) {
+  if (day === 'Tuesday' && s.wordsData && s.wordsData.length) {
+    const chips = s.wordsData.map(w => `
+      <div class="word-chip ${w.catCorrect?'correct':'wrong'}">
+        ${w.drawing ? `<img src="${w.drawing}" alt="${w.word}"/>` : ''}
+        <span><strong>${w.word}</strong><br>${w.chosenCat||''}${w.catCorrect?' ✅':' ❌'}</span>
+      </div>`).join('');
+    return `<div><strong>Words sorted:</strong><div class="word-chips">${chips}</div></div>`;
+  }
+  if (day === 'Wednesday' && s.storyPages && s.storyPages.length) {
+    const title = s.storyTitle ? `<div style="font-weight:bold;color:#534AB7;margin-bottom:6px;">📖 "${s.storyTitle}"</div>` : '';
+    const pages = s.storyPages.map(p => `<div class="story-page"><strong>${p.label}:</strong> ${p.text}</div>`).join('');
+    return title + `<div class="story-pages">${pages}</div>`;
+  }
+  if (s.details) {
+    return `<div style="color:#555;">${s.details}</div>`;
+  }
+  return '';
+}
+
+/* ── Render one day ───────────────────────────────── */
+function renderDay(day, students) {
+  const dc = DC[day];
+  const count = students.length;
+  gid(dc+'-count').textContent = count;
+  gid(dc+'-badge').textContent = count + ' student'+(count!==1?'s':'');
+
+  if (!count) {
+    gid(dc+'-meta').textContent = '';
+    gid(dc+'-list').innerHTML = '<div class="empty-state">No results yet — students will appear here as they complete the activity!</div>';
+    gid(dc+'-avg').textContent = '—';
+    gid(dc+'-top').textContent = '—';
+    gid(dc+'-pct').textContent = '—';
+    return 0;
+  }
+
+  const sorted = [...students].sort((a,b) => (b.score||0) - (a.score||0));
+  const total16 = day === 'Monday' ? 16 : sorted[0].total || 1;
+  const avg = Math.round(students.reduce((s,r)=>s+(r.score||0),0)/count*10)/10;
+  const top = sorted[0].score||0;
+  const avgPct = Math.round(students.reduce((s,r)=>s+((r.score||0)/(r.total||1)*100),0)/count);
+
+  gid(dc+'-avg').textContent = avg+'/'+(day==='Monday'?16:sorted[0].total||5);
+  gid(dc+'-top').textContent = top+'/'+(day==='Monday'?16:sorted[0].total||5);
+  gid(dc+'-pct').textContent = avgPct+'%';
+  gid(dc+'-meta').textContent = count+' completed · Avg: '+avg+' · Top: '+sorted[0].name+' ('+top+')';
+
+  gid(dc+'-list').innerHTML = sorted.map((s,i) => {
+    const pct = Math.min(100, Math.round(((s.score||0)/(s.total||1))*100));
+    const barW = Math.max(8, pct);
+    const scoreMax = day==='Monday' ? 16 : (s.total||1);
+    const workHtml = buildWorkDetail(s, day);
+    const hasWork = workHtml.length > 0;
+    const uid = 'work-'+dc+'-'+i;
+    return `<div class="student-row-wrap">
+      <div class="student-row">
+        <div class="rank">${medals[i]||((i+1)+'.')}</div>
+        <div class="student-name" title="${s.name}">${s.name}</div>
+        <div class="bar-wrap"><div class="bar-fill ${dc}" style="width:${barW}%">${s.score||0}/${scoreMax}</div></div>
+        <div class="pct-badge ${dc}">${pct}%</div>
+        <div class="time-lbl">${s.time||''}</div>
+        ${hasWork ? `<button class="work-toggle" onclick="toggleWork('${uid}')">📋 View work</button>` : ''}
+      </div>
+      ${hasWork ? `<div class="work-detail" id="${uid}">${workHtml}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return avg;
+}
+
+function toggleWork(uid) {
+  const el = document.getElementById(uid);
+  if (el) el.classList.toggle('open');
+}
+
+/* ── Chart ────────────────────────────────────────── */
+function updateChart(avgs) {
+  const maxH = 110;
+  DAYS.forEach(day => {
+    const dc = DC[day];
+    const avg = avgs[day]||0;
+    const maxScore = day==='Monday' ? 16 : 5;
+    const h = avg ? Math.max(14, Math.round((avg/maxScore)*maxH)) : 4;
+    gid('chart-'+dc).style.height = h+'px';
+    gid('chart-'+dc+'-val').textContent = avg ? avg.toFixed(1) : '';
+  });
+}
+
+/* ── Load & refresh ───────────────────────────────── */
+async function loadData() {
+  const sb = gid('statusBar');
+  gid('lastUpdated').textContent = 'Refreshing...';
+  sb.className = 'status-bar';
+  sb.textContent = 'Loading student results...';
+
+  let data = null;
+  let fromLocal = false;
+
+  try {
+    const res = await fetch(GET_URL + '?action=getData', { method: 'GET' });
+    const text = await res.text();
+    const parsed = JSON.parse(text);
+    data = mergeWithLocal(parsed);
+    sb.textContent = '✅ Results loaded from Google Sheets';
+    setTimeout(() => { sb.style.display='none'; }, 3000);
+  } catch(e) {
+    // Fall back to localStorage
+    const local = getLocalData();
+    if (local) {
+      data = local;
+      fromLocal = true;
+      sb.className = 'status-bar local';
+      sb.textContent = '📱 Showing results saved on this device (Google Sheets not connected)';
+    } else {
+      sb.className = 'status-bar error';
+      sb.textContent = 'No results yet. Students must complete an activity first.';
+      data = {Monday:[], Tuesday:[], Wednesday:[]};
+    }
+  }
+
+  const avgs = {};
+  DAYS.forEach(day => {
+    avgs[day] = renderDay(day, data[day]||[]);
+  });
+  updateChart(avgs);
+  gid('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) + (fromLocal?' (local)':'');
+}
+
+loadData();
+setInterval(loadData, 30000); // refresh every 30 seconds
+</script>
+</body>
+</html>

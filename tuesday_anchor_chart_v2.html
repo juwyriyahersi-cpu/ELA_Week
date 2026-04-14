@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELA Week - Tuesday: Word Anchor Chart</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#f0eeff;min-height:100vh;padding:12px;}
+.app{max-width:620px;margin:0 auto;}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* NAME SCREEN */
+.name-screen{text-align:center;padding:2rem 1rem;}
+.name-screen h1{font-size:26px;font-weight:bold;color:#534AB7;margin-bottom:6px;}
+.name-screen p{font-size:13px;color:#888;margin-bottom:24px;}
+.name-input{width:100%;padding:13px 16px;font-size:19px;border:3px solid #AFA9EC;border-radius:14px;font-family:Arial,sans-serif;outline:none;text-align:center;margin-bottom:14px;}
+.name-input:focus{border-color:#534AB7;}
+.big-btn{background:#534AB7;color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:17px;font-weight:bold;cursor:pointer;width:100%;font-family:Arial,sans-serif;}
+.big-btn:hover{background:#3C3489;}
+.big-btn:disabled{background:#D3D1C7;cursor:not-allowed;}
+
+/* HEADER */
+.page-hdr{background:#534AB7;border-radius:14px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.page-hdr-title{font-size:15px;font-weight:bold;color:#fff;}
+.progress-pills{display:flex;gap:6px;}
+.pill{width:22px;height:10px;border-radius:5px;background:rgba(255,255,255,0.3);}
+.pill.done{background:#FAC775;}
+.pill.current{background:#fff;}
+
+/* SPIN SCREEN */
+.wheel-screen-inner{text-align:center;}
+.wheel-box{background:#FAEEDA;border-radius:16px;padding:18px;margin-bottom:14px;border:2px dashed #EF9F27;}
+.wheel-wrap{position:relative;width:200px;height:200px;margin:0 auto 14px;}
+.wheel-ptr{position:absolute;top:-13px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:22px solid #E24B4A;}
+.spin-label{font-size:13px;color:#854F0B;font-weight:bold;margin-bottom:10px;}
+
+/* DRAW SCREEN */
+.word-big{font-size:38px;font-weight:bold;color:#3C3489;text-align:center;margin-bottom:4px;letter-spacing:1px;}
+.word-type-hint{font-size:13px;color:#888;text-align:center;margin-bottom:12px;}
+.draw-area{background:#fff;border-radius:16px;border:3px solid #AFA9EC;overflow:hidden;margin-bottom:10px;position:relative;}
+.draw-canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
+
+/* PALETTE */
+.palette-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.palette-label{font-size:11px;font-weight:bold;color:#534AB7;min-width:44px;}
+.swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;flex-shrink:0;}
+.swatch.sel{border-color:#3C3489;transform:scale(1.2);}
+.brush-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.brush-btn{border:2px solid #AFA9EC;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:bold;color:#534AB7;background:#EEEDFE;font-family:Arial;}
+.brush-btn.active{background:#534AB7;color:#fff;border-color:#534AB7;}
+
+/* STAMPS */
+.stamps-wrap{margin-bottom:10px;}
+.stamps-label{font-size:11px;font-weight:bold;color:#534AB7;margin-bottom:6px;}
+.stamps-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.stamp-btn{background:#fff;border:2px solid #AFA9EC;border-radius:10px;padding:5px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;font-weight:bold;color:#534AB7;transition:transform 0.1s;}
+.stamp-btn:hover{transform:scale(1.08);border-color:#7F77DD;}
+.stamp-btn.active-stamp{border-color:#534AB7;background:#EEEDFE;}
+.draw-actions{display:flex;gap:8px;margin-bottom:10px;}
+.clear-btn{background:#FCEBEB;color:#791F1F;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:bold;cursor:pointer;font-family:Arial;}
+.next-btn{background:#3B6D11;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:bold;cursor:pointer;flex:1;font-family:Arial;}
+
+/* SORT SCREEN */
+.drawing-preview{border-radius:12px;border:2px solid #AFA9EC;overflow:hidden;margin-bottom:14px;background:#fff;}
+.drawing-preview canvas{display:block;width:100%;}
+.cat-section-label{font-size:14px;font-weight:bold;color:#534AB7;margin-bottom:8px;text-align:center;}
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.cat-card{border:3px solid transparent;border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;transition:transform 0.1s;}
+.cat-card:hover{transform:scale(1.03);}
+.cat-card.selected{border-width:3px;}
+.cat-card .cat-name{font-size:14px;font-weight:bold;margin-bottom:2px;}
+.cat-card .cat-hint{font-size:10px;}
+.cat-card.v   {background:#E6F1FB;}  .cat-card.v.selected{border-color:#185FA5;}  .cat-card.v   .cat-name{color:#0C447C;} .cat-card.v   .cat-hint{color:#185FA5;}
+.cat-card.cn  {background:#EAF3DE;}  .cat-card.cn.selected{border-color:#3B6D11;} .cat-card.cn  .cat-name{color:#27500A;} .cat-card.cn  .cat-hint{color:#3B6D11;}
+.cat-card.sn  {background:#FAEEDA;}  .cat-card.sn.selected{border-color:#BA7517;} .cat-card.sn  .cat-name{color:#633806;} .cat-card.sn  .cat-hint{color:#854F0B;}
+.cat-card.pln {background:#FCEBEB;}  .cat-card.pln.selected{border-color:#A32D2D;}.cat-card.pln .cat-name{color:#791F1F;} .cat-card.pln .cat-hint{color:#A32D2D;}
+.cat-card.pn  {background:#FBEAF0;}  .cat-card.pn.selected{border-color:#993556;} .cat-card.pn  .cat-name{color:#72243E;} .cat-card.pn  .cat-hint{color:#993556;}
+.cat-card.aj  {background:#EEEDFE;}  .cat-card.aj.selected{border-color:#534AB7;} .cat-card.aj  .cat-name{color:#3C3489;} .cat-card.aj  .cat-hint{color:#534AB7;}
+.cat-card.prn {background:#E1F5EE;}  .cat-card.prn.selected{border-color:#0F6E56;}.cat-card.prn .cat-name{color:#085041;} .cat-card.prn .cat-hint{color:#0F6E56;}
+
+/* REASON */
+.reason-section{background:#fff;border-radius:14px;border:2px solid #AFA9EC;padding:14px;margin-bottom:14px;}
+.reason-sentence{font-size:16px;color:#333;line-height:1.7;text-align:center;}
+.reason-blank{display:inline-block;min-width:120px;border-bottom:3px solid #534AB7;margin:0 4px;color:#534AB7;font-weight:bold;cursor:pointer;text-align:center;}
+.reason-choices{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px;}
+.reason-chip{background:#EEEDFE;color:#3C3489;border:2px solid #AFA9EC;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:bold;cursor:pointer;font-family:Arial;}
+.reason-chip:hover{background:#534AB7;color:#fff;border-color:#534AB7;}
+.reason-chip.chosen{background:#534AB7;color:#fff;border-color:#534AB7;}
+.reason-feedback{text-align:center;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:bold;margin-top:10px;display:none;}
+.reason-feedback.show{display:block;}
+.reason-feedback.correct{background:#EAF3DE;color:#27500A;}
+.reason-feedback.wrong{background:#FCEBEB;color:#791F1F;}
+
+/* ANCHOR CHART SCREEN */
+.chart-screen-title{font-size:20px;font-weight:bold;color:#534AB7;text-align:center;margin-bottom:14px;}
+.chart-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.chart-col{border-radius:12px;padding:10px;}
+.chart-col.v  {background:#E6F1FB;border:2px solid #85B7EB;}
+.chart-col.cn {background:#EAF3DE;border:2px solid #97C459;}
+.chart-col.sn {background:#FAEEDA;border:2px solid #EF9F27;}
+.chart-col.pln{background:#FCEBEB;border:2px solid #F09595;}
+.chart-col.pn {background:#FBEAF0;border:2px solid #ED93B1;}
+.chart-col.aj {background:#EEEDFE;border:2px solid #AFA9EC;}
+.chart-col.prn{background:#E1F5EE;border:2px solid #5DCAA5;}
+.chart-col-title{font-size:12px;font-weight:bold;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid rgba(0,0,0,0.1);}
+.chart-col.v   .chart-col-title{color:#0C447C;}
+.chart-col.cn  .chart-col-title{color:#27500A;}
+.chart-col.sn  .chart-col-title{color:#633806;}
+.chart-col.pln .chart-col-title{color:#791F1F;}
+.chart-col.pn  .chart-col-title{color:#72243E;}
+.chart-col.aj  .chart-col-title{color:#3C3489;}
+.chart-col.prn .chart-col-title{color:#085041;}
+.chart-entries{display:flex;flex-direction:column;gap:6px;}
+.chart-entry{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.7);border-radius:8px;padding:4px 6px;}
+.chart-entry-thumb{width:36px;height:28px;border-radius:5px;flex-shrink:0;object-fit:cover;}
+.chart-entry-word{font-size:12px;font-weight:bold;color:#333;}
+.chart-entry.correct{border-left:3px solid #639922;}
+.chart-entry.wrong{border-left:3px solid #E24B4A;}
+
+.final-msg{text-align:center;border-radius:14px;padding:16px;font-size:15px;font-weight:bold;margin-bottom:14px;}
+.final-msg.perfect{background:#EEEDFE;color:#26215C;}
+.final-msg.great{background:#EAF3DE;color:#27500A;}
+.final-msg.ok{background:#FAEEDA;color:#633806;}
+.submit-st{text-align:center;font-size:12px;color:#534AB7;margin-bottom:12px;font-style:italic;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SCREEN 0: NAME -->
+<div class="screen active" id="s0">
+  <div class="name-screen">
+    <svg width="90" height="90" viewBox="0 0 100 100" style="margin:0 auto 12px;display:block;">
+      <circle cx="50" cy="50" r="46" fill="#FAEEDA" stroke="#EF9F27" stroke-width="3"/>
+      <line x1="50" y1="50" x2="50" y2="12" stroke="#E24B4A" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="7" fill="#534AB7"/>
+    </svg>
+    <h1>Word Anchor Chart</h1>
+    <p>Spin the wheel, draw a picture, sort the word — build your chart!</p>
+    <input class="name-input" id="nameInput" type="text" placeholder="Type your name..." maxlength="40"/>
+    <button class="big-btn" onclick="startGame()">Let's go!</button>
+  </div>
+</div>
+
+<!-- SCREEN 1: SPIN -->
+<div class="screen" id="s1">
+  <div class="page-hdr">
+    <div class="page-hdr-title">Spin for your word!</div>
+    <div class="progress-pills" id="progressPills"></div>
+  </div>
+  <div class="wheel-screen-inner">
+    <div class="wheel-box">
+      <div class="spin-label">Tap the wheel to spin!</div>
+      <div class="wheel-wrap">
+        <div class="wheel-ptr"></div>
+        <canvas id="wheelCanvas" width="200" height="200" onclick="spinWheel()" style="cursor:pointer;border-radius:50%;"></canvas>
+      </div>
+      <button class="big-btn" id="spinBtn" onclick="spinWheel()" style="max-width:220px;">Spin the Wheel!</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: DRAW -->
+<div class="screen" id="s2">
+  <div class="page-hdr">
+    <div class="page-hdr-title">Draw your word!</div>
+    <div class="progress-pills" id="progressPills2"></div>
+  </div>
+  <div class="word-big" id="drawWord"></div>
+  <div class="word-type-hint" id="drawHint"></div>
+
+  <div class="draw-area">
+    <canvas id="drawCanvas" width="560" height="300" class="draw-canvas"></canvas>
+  </div>
+
+  <div class="palette-row">
+    <span class="palette-label">Colour:</span>
+    <div id="palette"></div>
+  </div>
+  <div class="brush-row">
+    <span style="font-size:11px;color:#666;min-width:44px;">Brush:</span>
+    <button class="brush-btn active" onclick="setBrush(5,this)">Thin</button>
+    <button class="brush-btn" onclick="setBrush(14,this)">Medium</button>
+    <button class="brush-btn" onclick="setBrush(26,this)">Thick</button>
+    <button class="brush-btn" onclick="setBrush(40,this)">Fill</button>
+  </div>
+
+  <div class="stamps-wrap">
+    <div class="stamps-label">Stamp a shape:</div>
+    <div class="stamps-grid" id="stampsGrid"></div>
+  </div>
+
+  <div class="draw-actions">
+    <button class="clear-btn" onclick="clearCanvas()">Clear</button>
+    <button class="next-btn" onclick="goToSort()">Done — sort the word!</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: SORT + REASON -->
+<div class="screen" id="s3">
+  <div class="page-hdr">
+    <div class="page-hdr-title">Sort the word!</div>
+    <div class="progress-pills" id="progressPills3"></div>
+  </div>
+
+  <div class="word-big" id="sortWord" style="margin-bottom:10px;"></div>
+
+  <div class="drawing-preview" id="drawingPreview">
+    <canvas id="previewCanvas" width="560" height="160"></canvas>
+  </div>
+
+  <div class="cat-section-label">Which category does this word belong to?</div>
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div class="reason-section" id="reasonSection" style="display:none;">
+    <div class="reason-sentence" id="reasonSentence"></div>
+    <div class="reason-choices" id="reasonChoices"></div>
+    <div class="reason-feedback" id="reasonFeedback"></div>
+  </div>
+
+  <button class="big-btn" id="sortNextBtn" style="display:none;" onclick="finishWord()">Next word</button>
+</div>
+
+<!-- SCREEN 4: ANCHOR CHART -->
+<div class="screen" id="s4">
+  <div class="page-hdr">
+    <div class="page-hdr-title">My Anchor Chart</div>
+    <div style="font-size:12px;color:#CECBF6;" id="chartScore"></div>
+  </div>
+  <div class="chart-screen-title">My Word Anchor Chart</div>
+  <div class="chart-cols" id="chartCols"></div>
+  <div class="final-msg" id="finalMsg"></div>
+  <div class="submit-st" id="submitSt"></div>
+  <button class="big-btn" onclick="resetGame()">Play again!</button>
+</div>
+
+</div>
+<script>
+const WEB_APP_URL='https://script.google.com/macros/s/AKfycbzcjWJYwlvJoJ_ozvthknLMeeWTcUyAKE_LuIxepopGIFI4I915cJBsGGuXC3GIQZYtNA/exec';
+const DAY='Tuesday';
+const TOTAL_WORDS=5;
+
+const CAT_INFO={
+  verb:     {cls:'v',   name:'Verb',          hint:'An action word',
+    sentence:'"{w}" is a verb because it is an ___ word.',
+    choices:[
+      {text:'action', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#185FA5"/><line x1="30" y1="22" x2="30" y2="38" stroke="#185FA5" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="28" x2="18" y2="36" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="28" x2="42" y2="24" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="20" y2="48" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="42" y2="44" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/></svg>'},
+      {text:'colour', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><circle cx="20" cy="28" r="8" fill="#E24B4A"/><circle cx="40" cy="28" r="8" fill="#185FA5"/><circle cx="30" cy="42" r="8" fill="#EF9F27"/></svg>'},
+      {text:'name',   icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FBEAF0"/><circle cx="30" cy="20" r="9" fill="#F0997B"/><rect x="20" y="30" width="20" height="16" rx="4" fill="#D4537E"/></svg>'},
+      {text:'describing', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><circle cx="30" cy="30" r="14" fill="#FAC775"/><circle cx="24" cy="26" r="3" fill="#2C2C2A"/><circle cx="36" cy="26" r="3" fill="#2C2C2A"/><path d="M22 36 Q30 44 38 36" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>'},
+    ], correct:'action'},
+  commonnoun:{cls:'cn', name:'Common Noun',    hint:'A person, place, animal or thing',
+    sentence:'"{w}" is a common noun because it is a ___.',
+    choices:[
+      {text:'person, place, animal or thing', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><circle cx="20" cy="22" r="7" fill="#F0997B"/><circle cx="40" cy="22" r="7" fill="#F0997B"/><rect x="12" y="30" width="15" height="14" rx="4" fill="#639922"/><rect x="33" y="30" width="15" height="14" rx="4" fill="#639922"/><ellipse cx="30" cy="48" rx="14" ry="7" fill="#3B6D11"/></svg>'},
+      {text:'feeling', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><circle cx="30" cy="30" r="16" fill="#FAC775"/><circle cx="24" cy="26" r="3" fill="#2C2C2A"/><circle cx="36" cy="26" r="3" fill="#2C2C2A"/><path d="M22 38 Q30 46 38 38" stroke="#E24B4A" stroke-width="3" fill="none" stroke-linecap="round"/></svg>'},
+      {text:'action', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#185FA5"/><line x1="30" y1="22" x2="30" y2="38" stroke="#185FA5" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="28" x2="18" y2="36" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="20" y2="48" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/></svg>'},
+      {text:'colour', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><circle cx="20" cy="28" r="8" fill="#E24B4A"/><circle cx="40" cy="28" r="8" fill="#185FA5"/><circle cx="30" cy="42" r="8" fill="#EF9F27"/></svg>'},
+    ], correct:'person, place, animal or thing'},
+  singnoun: {cls:'sn',  name:'Singular Noun',  hint:'One person, place or thing',
+    sentence:'"{w}" is a singular noun because it means ___ one.',
+    choices:[
+      {text:'only', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><circle cx="30" cy="30" r="14" fill="#EF9F27"/><text x="30" y="35" text-anchor="middle" font-size="16" fill="#fff" font-family="Arial" font-weight="bold">1</text></svg>'},
+      {text:'more than', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><circle cx="18" cy="30" r="9" fill="#639922"/><circle cx="30" cy="30" r="9" fill="#639922"/><circle cx="42" cy="30" r="9" fill="#639922"/></svg>'},
+      {text:'every', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><text x="30" y="36" text-anchor="middle" font-size="22" fill="#534AB7" font-family="Arial" font-weight="bold">ALL</text></svg>'},
+      {text:'no', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FCEBEB"/><line x1="18" y1="18" x2="42" y2="42" stroke="#E24B4A" stroke-width="6" stroke-linecap="round"/><line x1="42" y1="18" x2="18" y2="42" stroke="#E24B4A" stroke-width="6" stroke-linecap="round"/></svg>'},
+    ], correct:'only'},
+  pluralnoun:{cls:'pln',name:'Plural Noun',    hint:'More than one',
+    sentence:'"{w}" is a plural noun because it means more than ___ thing.',
+    choices:[
+      {text:'one', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><circle cx="30" cy="30" r="14" fill="#EF9F27"/><text x="30" y="35" text-anchor="middle" font-size="16" fill="#fff" font-family="Arial" font-weight="bold">1</text></svg>'},
+      {text:'ten', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><text x="30" y="36" text-anchor="middle" font-size="20" fill="#3B6D11" font-family="Arial" font-weight="bold">10</text></svg>'},
+      {text:'two', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#E6F1FB"/><text x="30" y="36" text-anchor="middle" font-size="20" fill="#185FA5" font-family="Arial" font-weight="bold">2</text></svg>'},
+      {text:'many', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FCEBEB"/><circle cx="18" cy="24" r="7" fill="#E24B4A"/><circle cx="30" cy="24" r="7" fill="#E24B4A"/><circle cx="42" cy="24" r="7" fill="#E24B4A"/><circle cx="24" cy="38" r="7" fill="#E24B4A"/><circle cx="36" cy="38" r="7" fill="#E24B4A"/></svg>'},
+    ], correct:'one'},
+  propernoun:{cls:'pn', name:'Proper Noun',    hint:'A special name',
+    sentence:'"{w}" is a proper noun because it is a ___ name.',
+    choices:[
+      {text:'special', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FBEAF0"/><polygon points="30,10 34,22 46,22 37,30 40,42 30,34 20,42 23,30 14,22 26,22" fill="#D4537E"/></svg>'},
+      {text:'small',   icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><circle cx="30" cy="32" r="9" fill="#639922"/></svg>'},
+      {text:'action',  icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#185FA5"/><line x1="30" y1="22" x2="30" y2="38" stroke="#185FA5" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="28" x2="18" y2="36" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/></svg>'},
+      {text:'colour',  icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><circle cx="20" cy="28" r="8" fill="#E24B4A"/><circle cx="40" cy="28" r="8" fill="#185FA5"/><circle cx="30" cy="42" r="8" fill="#EF9F27"/></svg>'},
+    ], correct:'special'},
+  adjective: {cls:'aj', name:'Adjective',      hint:'Describes something',
+    sentence:'"{w}" is an adjective because it ___ something.',
+    choices:[
+      {text:'describes', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><circle cx="30" cy="30" r="14" fill="#FAC775"/><circle cx="24" cy="26" r="3" fill="#2C2C2A"/><circle cx="36" cy="26" r="3" fill="#2C2C2A"/><path d="M22 36 Q30 44 38 36" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/><text x="30" y="12" text-anchor="middle" font-size="8" fill="#534AB7" font-family="Arial" font-weight="bold">BIG! HAPPY!</text></svg>'},
+      {text:'names',    icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FBEAF0"/><circle cx="30" cy="20" r="9" fill="#F0997B"/><rect x="20" y="30" width="20" height="16" rx="4" fill="#D4537E"/></svg>'},
+      {text:'replaces', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#E1F5EE"/><text x="22" y="28" font-size="11" fill="#085041" font-family="Arial" font-weight="bold">cat</text><line x1="20" y1="32" x2="40" y2="32" stroke="#1D9E75" stroke-width="2"/><text x="22" y="44" font-size="11" fill="#1D9E75" font-family="Arial" font-weight="bold">it</text></svg>'},
+      {text:'counts',   icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><text x="30" y="36" text-anchor="middle" font-size="20" fill="#EF9F27" font-family="Arial" font-weight="bold">123</text></svg>'},
+    ], correct:'describes'},
+  pronoun:   {cls:'prn',name:'Pronoun',        hint:'Replaces a noun',
+    sentence:'"{w}" is a pronoun because it ___ a noun.',
+    choices:[
+      {text:'replaces', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#E1F5EE"/><text x="22" y="26" font-size="9" fill="#085041" font-family="Arial" font-weight="bold">Sara</text><line x1="18" y1="30" x2="42" y2="30" stroke="#1D9E75" stroke-width="2.5"/><text x="22" y="42" font-size="11" fill="#1D9E75" font-family="Arial" font-weight="bold">she</text></svg>'},
+      {text:'describes', icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><circle cx="30" cy="30" r="14" fill="#FAC775"/><circle cx="24" cy="26" r="3" fill="#2C2C2A"/><circle cx="36" cy="26" r="3" fill="#2C2C2A"/><path d="M22 36 Q30 44 38 36" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>'},
+      {text:'names',    icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FBEAF0"/><circle cx="30" cy="20" r="9" fill="#F0997B"/><rect x="20" y="30" width="20" height="16" rx="4" fill="#D4537E"/></svg>'},
+      {text:'counts',   icon:'<svg width="44" height="44" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><text x="30" y="36" text-anchor="middle" font-size="20" fill="#EF9F27" font-family="Arial" font-weight="bold">123</text></svg>'},
+    ], correct:'replaces'},
+};
+
+const ALL_WORDS=[
+  {word:'run',cat:'verb'},{word:'jump',cat:'verb'},{word:'hop',cat:'verb'},{word:'skip',cat:'verb'},{word:'walk',cat:'verb'},{word:'eat',cat:'verb'},{word:'read',cat:'verb'},{word:'sing',cat:'verb'},
+  {word:'boy',cat:'commonnoun'},{word:'girl',cat:'commonnoun'},{word:'teacher',cat:'commonnoun'},{word:'school',cat:'commonnoun'},{word:'friend',cat:'commonnoun'},{word:'park',cat:'commonnoun'},{word:'flower',cat:'commonnoun'},{word:'moon',cat:'commonnoun'},
+  {word:'cat',cat:'singnoun'},{word:'dog',cat:'singnoun'},{word:'book',cat:'singnoun'},{word:'car',cat:'singnoun'},{word:'ball',cat:'singnoun'},{word:'star',cat:'singnoun'},{word:'sun',cat:'singnoun'},{word:'tree',cat:'singnoun'},
+  {word:'cats',cat:'pluralnoun'},{word:'dogs',cat:'pluralnoun'},{word:'books',cat:'pluralnoun'},{word:'balls',cat:'pluralnoun'},{word:'stars',cat:'pluralnoun'},{word:'cars',cat:'pluralnoun'},{word:'trees',cat:'pluralnoun'},{word:'flowers',cat:'pluralnoun'},
+  {word:'Friday',cat:'propernoun'},{word:'Dubai',cat:'propernoun'},{word:'Mecca',cat:'propernoun'},{word:'Ramadan',cat:'propernoun'},{word:'Sara',cat:'propernoun'},{word:'Eid',cat:'propernoun'},{word:'Monday',cat:'propernoun'},{word:'English',cat:'propernoun'},
+  {word:'big',cat:'adjective'},{word:'small',cat:'adjective'},{word:'tall',cat:'adjective'},{word:'fast',cat:'adjective'},{word:'happy',cat:'adjective'},{word:'hot',cat:'adjective'},{word:'cold',cat:'adjective'},{word:'fluffy',cat:'adjective'},
+  {word:'I',cat:'pronoun'},{word:'you',cat:'pronoun'},{word:'he',cat:'pronoun'},{word:'she',cat:'pronoun'},{word:'it',cat:'pronoun'},{word:'we',cat:'pronoun'},{word:'they',cat:'pronoun'},{word:'me',cat:'pronoun'},
+];
+
+const PALETTE=['#E24B4A','#EF9F27','#FAC775','#3B6D11','#97C459','#185FA5','#85B7EB','#534AB7','#D4537E','#1D9E75','#854F0B','#2C2C2A','#ffffff','#F0997B','#CECBF6','#C0DD97','#ff69b4','#00ced1'];
+
+const STAMPS=[
+  {name:'Sun',    draw:(ctx,x,y)=>{ ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fillStyle=activeStampColor;ctx.fill(); for(let a=0;a<8;a++){const r=a*Math.PI/4;ctx.beginPath();ctx.moveTo(x+26*Math.cos(r),y+26*Math.sin(r));ctx.lineTo(x+36*Math.cos(r),y+36*Math.sin(r));ctx.strokeStyle=activeStampColor;ctx.lineWidth=4;ctx.stroke();}}},
+  {name:'Cloud',  draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;[{dx:-16,dy:8,r:14},{dx:0,dy:0,r:18},{dx:18,dy:6,r:14},{dx:-8,dy:16,r:12},{dx:10,dy:16,r:12}].forEach(c=>{ctx.beginPath();ctx.arc(x+c.dx,y+c.dy,c.r,0,Math.PI*2);ctx.fill();})}},
+  {name:'Tree',   draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;ctx.beginPath();ctx.arc(x,y-10,22,0,Math.PI*2);ctx.fill();ctx.arc(x-14,y,14,0,Math.PI*2);ctx.fill();ctx.arc(x+14,y,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#854F0B';ctx.fillRect(x-5,y+10,10,22);}},
+  {name:'Flower', draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;for(let a=0;a<6;a++){const r=a*Math.PI/3;ctx.beginPath();ctx.arc(x+16*Math.cos(r),y+16*Math.sin(r),10,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#FAC775';ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#3B6D11';ctx.fillRect(x-3,y+10,6,20);}},
+  {name:'Star',   draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;ctx.beginPath();for(let i=0;i<5;i++){const r=i*4*Math.PI/5-Math.PI/2;ctx.lineTo(x+22*Math.cos(r),y+22*Math.sin(r));const r2=r+2*Math.PI/5;ctx.lineTo(x+9*Math.cos(r2),y+9*Math.sin(r2));}ctx.closePath();ctx.fill();}},
+  {name:'House',  draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;ctx.fillRect(x-22,y,44,30);ctx.beginPath();ctx.moveTo(x-26,y);ctx.lineTo(x,y-24);ctx.lineTo(x+26,y);ctx.closePath();ctx.fillStyle='#E24B4A';ctx.fill();ctx.fillStyle='#85B7EB';ctx.fillRect(x-8,y+8,16,22);}},
+  {name:'Slide',  draw:(ctx,x,y)=>{ ctx.strokeStyle=activeStampColor;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-20,y-20);ctx.lineTo(x+20,y+20);ctx.stroke();ctx.beginPath();ctx.moveTo(x-20,y-20);ctx.lineTo(x-20,y+20);ctx.stroke();ctx.beginPath();ctx.moveTo(x+20,y+20);ctx.lineTo(x+30,y+20);ctx.stroke();}},
+  {name:'Waves',  draw:(ctx,x,y)=>{ ctx.strokeStyle=activeStampColor;ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-28,y-8+i*8);for(let j=0;j<4;j++){ctx.quadraticCurveTo(x-14+j*14,y-16+i*8,x+j*14,y-8+i*8);}ctx.stroke();}}},
+  {name:'Sand',   draw:(ctx,x,y)=>{ ctx.fillStyle='#FAC775';ctx.beginPath();ctx.ellipse(x,y+10,30,12,0,0,Math.PI);ctx.fill();}},
+  {name:'Heart',  draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;ctx.beginPath();ctx.moveTo(x,y+14);ctx.bezierCurveTo(x,y+8,x-22,y-2,x-22,y-12);ctx.bezierCurveTo(x-22,y-24,x,y-24,x,y-12);ctx.bezierCurveTo(x,y-24,x+22,y-24,x+22,y-12);ctx.bezierCurveTo(x+22,y-2,x,y+8,x,y+14);ctx.fill();}},
+  {name:'Ball',   draw:(ctx,x,y)=>{ ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fillStyle=activeStampColor;ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-20,y);ctx.quadraticCurveTo(x,y-10,x+20,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-20);ctx.quadraticCurveTo(x+10,y,x,y+20);ctx.stroke();}},
+  {name:'Book',   draw:(ctx,x,y)=>{ ctx.fillStyle=activeStampColor;ctx.fillRect(x-22,y-18,44,36);ctx.fillStyle='#fff';ctx.fillRect(x-20,y-15,18,30);ctx.fillRect(x+2,y-15,18,30);ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=1;[5,10,15].forEach(dy=>{ctx.beginPath();ctx.moveTo(x-18,y-15+dy);ctx.lineTo(x-4,y-15+dy);ctx.stroke();ctx.beginPath();ctx.moveTo(x+4,y-15+dy);ctx.lineTo(x+18,y-15+dy);ctx.stroke();})}},
+];
+
+let studentName='',queue=[],wordIdx=0,score=0,answers=[],drawingThumbs={};
+let angle=0,spinVel=0,spinning=false;
+let brushColor='#E24B4A',brushSize=5,painting=false;
+let selectedCat=null,selectedReason=null;
+let activeStampColor='#E24B4A',activeStamp=null;
+let stampMode=false;
+
+function gid(id){return document.getElementById(id);}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));gid(id).classList.add('active');}
+
+function startGame(){
+  const n=gid('nameInput').value.trim();
+  if(!n){alert('Please type your name!');return;}
+  studentName=n;
+  queue=shuffle(ALL_WORDS).slice(0,TOTAL_WORDS);
+  wordIdx=0;score=0;answers=[];drawingThumbs={};
+  buildPalette();buildStamps();
+  updateProgress();
+  showScreen('s1');
+  drawWheel();
+}
+
+function updateProgress(){
+  ['progressPills','progressPills2','progressPills3'].forEach(id=>{
+    const el=gid(id);if(!el)return;
+    el.innerHTML='';
+    for(let i=0;i<TOTAL_WORDS;i++){
+      const p=document.createElement('div');
+      p.className='pill'+(i<wordIdx?' done':i===wordIdx?' current':'');
+      el.appendChild(p);
+    }
+  });
+}
+
+// WHEEL
+const CAT_KEYS=Object.keys(CAT_INFO);
+const CAT_COLORS_MAP={verb:'#378ADD',commonnoun:'#639922',singnoun:'#EF9F27',pluralnoun:'#E24B4A',propernoun:'#D4537E',adjective:'#7F77DD',pronoun:'#1D9E75'};
+
+function drawWheel(){
+  const canvas=gid('wheelCanvas');
+  const ctx=canvas.getContext('2d');
+  const cx=100,cy=100,r=95;
+  ctx.clearRect(0,0,200,200);
+  const sa=(Math.PI*2)/CAT_KEYS.length;
+  CAT_KEYS.forEach((cat,i)=>{
+    const s=angle+i*sa,e=s+sa;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
+    ctx.fillStyle=CAT_COLORS_MAP[cat];ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(s+sa/2);
+    ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 9px Arial';
+    const lbl=CAT_INFO[cat].name.split(' ');
+    if(lbl.length===1)ctx.fillText(lbl[0],r-6,4);
+    else{ctx.fillText(lbl[0],r-6,-2);ctx.fillText(lbl[1],r-6,9);}
+    ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,13,0,Math.PI*2);ctx.fillStyle='#534AB7';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+}
+
+function spinWheel(){
+  if(spinning)return;
+  spinning=true;gid('spinBtn').disabled=true;
+  spinVel=0.2+Math.random()*0.2;
+  requestAnimationFrame(animSpin);
+}
+function animSpin(){angle+=spinVel;spinVel*=0.987;drawWheel();if(spinVel>0.003)requestAnimationFrame(animSpin);else{spinning=false;goToDraw();}}
+
+function goToDraw(){
+  const w=queue[wordIdx];
+  gid('drawWord').textContent=w.word;
+  gid('drawHint').textContent='Draw a picture for: "'+w.word+'"';
+  clearCanvas();
+  stampMode=false;activeStamp=null;
+  document.querySelectorAll('.stamp-btn').forEach(b=>b.classList.remove('active-stamp'));
+  updateProgress();
+  showScreen('s2');
+}
+
+// PALETTE
+function buildPalette(){
+  const p=gid('palette');p.innerHTML='';
+  p.style.display='flex';p.style.flexWrap='wrap';p.style.gap='5px';
+  PALETTE.forEach((c,i)=>{
+    const s=document.createElement('div');
+    s.className='swatch'+(i===0?' sel':'');
+    s.style.background=c;
+    s.style.border=c==='#ffffff'?'2px solid #ccc':'3px solid transparent';
+    s.onclick=()=>{
+      brushColor=c;activeStampColor=c;
+      p.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel'));
+      s.classList.add('sel');
+    };
+    p.appendChild(s);
+  });
+}
+
+function setBrush(size,btn){
+  brushSize=size;stampMode=false;activeStamp=null;
+  document.querySelectorAll('.brush-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.stamp-btn').forEach(b=>b.classList.remove('active-stamp'));
+}
+
+// STAMPS
+function buildStamps(){
+  const g=gid('stampsGrid');g.innerHTML='';
+  STAMPS.forEach((st,i)=>{
+    const btn=document.createElement('button');
+    btn.className='stamp-btn';
+    const previewC=document.createElement('canvas');previewC.width=40;previewC.height=36;
+    const pctx=previewC.getContext('2d');
+    activeStampColor='#534AB7';
+    st.draw(pctx,20,20);
+    activeStampColor=brushColor;
+    btn.appendChild(previewC);
+    const lbl=document.createElement('div');lbl.textContent=st.name;btn.appendChild(lbl);
+    btn.onclick=()=>{
+      stampMode=true;activeStamp=st;
+      document.querySelectorAll('.stamp-btn').forEach(b=>b.classList.remove('active-stamp'));
+      btn.classList.add('active-stamp');
+    };
+    g.appendChild(btn);
+  });
+}
+
+// DRAW CANVAS
+function setupDrawCanvas(){
+  const canvas=gid('drawCanvas');
+  const ctx=canvas.getContext('2d');
+  function getPos(e){
+    const rect=canvas.getBoundingClientRect();
+    const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+    const src=e.touches?e.touches[0]:e;
+    return{x:(src.clientX-rect.left)*sx,y:(src.clientY-rect.top)*sy};
+  }
+  canvas.onmousedown=e=>{
+    if(stampMode&&activeStamp){const pos=getPos(e);activeStampColor=brushColor;activeStamp.draw(ctx,pos.x,pos.y);}
+    else{painting=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+  };
+  canvas.onmousemove=e=>{
+    if(!painting||stampMode)return;
+    const pos=getPos(e);ctx.lineWidth=brushSize;ctx.lineCap='round';ctx.strokeStyle=brushColor;ctx.lineTo(pos.x,pos.y);ctx.stroke();
+  };
+  canvas.onmouseup=()=>painting=false;canvas.onmouseleave=()=>painting=false;
+  canvas.ontouchstart=e=>{e.preventDefault();
+    if(stampMode&&activeStamp){const pos=getPos(e);activeStampColor=brushColor;activeStamp.draw(ctx,pos.x,pos.y);}
+    else{painting=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+  },{passive:false};
+  canvas.ontouchmove=e=>{e.preventDefault();if(!painting||stampMode)return;const pos=getPos(e);ctx.lineWidth=brushSize;ctx.lineCap='round';ctx.strokeStyle=brushColor;ctx.lineTo(pos.x,pos.y);ctx.stroke();};
+  canvas.ontouchend=()=>painting=false;
+}
+
+function clearCanvas(){
+  const canvas=gid('drawCanvas');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+// SORT SCREEN
+function goToSort(){
+  const w=queue[wordIdx];
+  saveThumbnail();
+  gid('sortWord').textContent=w.word;
+  // show preview
+  const src=gid('drawCanvas');
+  const prev=gid('previewCanvas');
+  prev.getContext('2d').drawImage(src,0,0,src.width,src.height,0,0,prev.width,prev.height);
+  // build cat cards
+  const grid=gid('catGrid');grid.innerHTML='';
+  Object.keys(CAT_INFO).forEach(cat=>{
+    const info=CAT_INFO[cat];
+    const card=document.createElement('div');
+    card.className='cat-card '+info.cls;
+    card.innerHTML=`<div class="cat-name">${info.name}</div><div class="cat-hint">${info.hint}</div>`;
+    card.onclick=()=>selectCat(cat,card);
+    grid.appendChild(card);
+  });
+  selectedCat=null;selectedReason=null;
+  gid('reasonSection').style.display='none';
+  gid('sortNextBtn').style.display='none';
+  updateProgress();
+  showScreen('s3');
+}
+
+function selectCat(cat,card){
+  selectedCat=cat;selectedReason=null;
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  showReason(cat);
+}
+
+function showReason(cat){
+  const w=queue[wordIdx];
+  const info=CAT_INFO[cat];
+  const rs=gid('reasonSection');rs.style.display='block';
+  const sentence=info.sentence.replace('{w}',w.word);
+  const parts=sentence.split('___');
+  gid('reasonSentence').innerHTML=parts[0]+'<span class="reason-blank" id="reasonBlank">___</span>'+parts[1];
+  const choicesEl=gid('reasonChoices');choicesEl.innerHTML='';
+  info.choices.forEach(ch=>{
+    const card=document.createElement('button');
+    card.className='reason-chip';
+    card.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:14px;min-width:70px;';
+    card.innerHTML=ch.icon+'<span style="font-size:11px;font-weight:bold;">'+ch.text+'</span>';
+    card.onclick=()=>selectReason(ch.text,card,info.correct);
+    choicesEl.appendChild(card);
+  });
+  gid('reasonFeedback').classList.remove('show');
+  gid('sortNextBtn').style.display='none';
+}
+
+function selectReason(choice,chip,correct){
+  selectedReason=choice;
+  document.querySelectorAll('.reason-chip').forEach(c=>c.classList.remove('chosen'));
+  chip.classList.add('chosen');
+  gid('reasonBlank').textContent=choice;
+  const catCorrect=selectedCat===queue[wordIdx].cat;
+  const reasonCorrect=choice===correct;
+  const fb=gid('reasonFeedback');
+  fb.classList.add('show');
+  if(catCorrect&&reasonCorrect){
+    fb.className='reason-feedback show correct';
+    fb.textContent='Perfect! "'+queue[wordIdx].word+'" is a '+CAT_INFO[queue[wordIdx].cat].name+' and your reason is right!';
+    score++;
+  } else if(catCorrect){
+    fb.className='reason-feedback show correct';
+    fb.textContent='Good category! The best reason is: "'+correct+'"';
+    score+=0.5;
+  } else {
+    fb.className='reason-feedback show wrong';
+    fb.textContent='Not quite! "'+queue[wordIdx].word+'" is a '+CAT_INFO[queue[wordIdx].cat].name+'.';
+  }
+  answers.push({word:queue[wordIdx].word,chosenCat:selectedCat,correctCat:queue[wordIdx].cat,catCorrect,reasonCorrect,reason:choice});
+  gid('sortNextBtn').style.display='block';
+}
+
+function saveThumbnail(){
+  const src=gid('drawCanvas');
+  const mini=document.createElement('canvas');mini.width=72;mini.height=44;
+  mini.getContext('2d').drawImage(src,0,0,src.width,src.height,0,0,72,44);
+  drawingThumbs[queue[wordIdx].word]=mini.toDataURL();
+}
+
+function finishWord(){
+  wordIdx++;
+  if(wordIdx>=TOTAL_WORDS){showChart();return;}
+  updateProgress();
+  selectedCat=null;selectedReason=null;
+  showScreen('s1');
+  drawWheel();
+}
+
+// CHART SCREEN
+function showChart(){
+  const catGroups={};
+  answers.forEach(a=>{
+    const cat=a.chosenCat;
+    if(!catGroups[cat])catGroups[cat]=[];
+    catGroups[cat].push(a);
+  });
+  const cols=gid('chartCols');cols.innerHTML='';
+  Object.keys(CAT_INFO).forEach(cat=>{
+    const info=CAT_INFO[cat];
+    const col=document.createElement('div');col.className='chart-col '+info.cls;
+    col.innerHTML=`<div class="chart-col-title">${info.name}</div><div class="chart-entries" id="chartEntries-${cat}"></div>`;
+    cols.appendChild(col);
+    const entries=gid('chartEntries-'+cat);
+    (catGroups[cat]||[]).forEach(a=>{
+      const entry=document.createElement('div');
+      entry.className='chart-entry '+(a.catCorrect?'correct':'wrong');
+      const thumb=drawingThumbs[a.word]||'';
+      entry.innerHTML=`<img class="chart-entry-thumb" src="${thumb}"/><span class="chart-entry-word">${a.word}</span>`;
+      entries.appendChild(entry);
+    });
+  });
+  const totalScore=Math.round(answers.filter(a=>a.catCorrect).length);
+  const pct=Math.round(totalScore/TOTAL_WORDS*100);
+  gid('chartScore').textContent=totalScore+'/'+TOTAL_WORDS+' correct';
+  const msg=gid('finalMsg');
+  if(pct===100){msg.className='final-msg perfect';msg.textContent='Perfect score! Amazing artist AND grammar superstar!';}
+  else if(pct>=75){msg.className='final-msg great';msg.textContent='Brilliant! '+totalScore+' out of '+TOTAL_WORDS+' correct! Wonderful chart!';}
+  else{msg.className='final-msg ok';msg.textContent='Good try! '+totalScore+' out of '+TOTAL_WORDS+'. Play again to improve!';}
+  showScreen('s4');
+  const details=answers.map(a=>a.word+':'+(a.catCorrect?'correct':'wrong')).join(', ');
+
+  // Save full results to localStorage so teacher dashboard can display actual work
+  try {
+    const stored = localStorage.getItem('ela_week_results');
+    const localData = stored ? JSON.parse(stored) : {Monday:[],Tuesday:[],Wednesday:[]};
+    if (!localData.Tuesday) localData.Tuesday = [];
+    const entry = {
+      name: studentName,
+      score: totalScore,
+      total: TOTAL_WORDS,
+      time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+      details,
+      wordsData: answers.map(a=>({
+        word: a.word,
+        chosenCat: a.chosenCat,
+        correctCat: a.correctCat,
+        catCorrect: a.catCorrect,
+        reasonCorrect: a.reasonCorrect,
+        drawing: drawingThumbs[a.word]||''
+      }))
+    };
+    localData.Tuesday = localData.Tuesday.filter(e=>e.name!==studentName);
+    localData.Tuesday.push(entry);
+    localStorage.setItem('ela_week_results', JSON.stringify(localData));
+  } catch(e) {}
+
+  fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({day:DAY,name:studentName,score:totalScore,total:TOTAL_WORDS,percentage:pct,details})})
+    .then(()=>{gid('submitSt').textContent='Results sent to your teacher! ✅';})
+    .catch(()=>{gid('submitSt').textContent='Results saved! Tell your teacher your score: '+totalScore+'/'+TOTAL_WORDS;});
+}
+
+function resetGame(){
+  wordIdx=0;score=0;answers=[];drawingThumbs={};spinning=false;angle=0;
+  queue=shuffle(ALL_WORDS).slice(0,TOTAL_WORDS);
+  updateProgress();showScreen('s1');drawWheel();
+}
+
+// INIT
+window.onload=()=>{setupDrawCanvas();};
+</script>
+</body>
+</html>

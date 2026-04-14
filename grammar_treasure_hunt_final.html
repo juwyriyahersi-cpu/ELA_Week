@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELA Week - Monday: Grammar Treasure Hunt</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f0eeff; min-height: 100vh; padding: 20px; }
+.g { font-family: Arial, sans-serif; padding: 0.5rem 0 1rem; max-width: 480px; margin: 0 auto; }
+
+/* NAME SCREEN */
+.name-screen { text-align: center; padding: 2rem 1rem; }
+.name-screen h1 { font-size: 26px; font-weight: bold; color: #3C3489; margin-bottom: 8px; }
+.name-screen p { font-size: 14px; color: #666; margin-bottom: 24px; }
+.chest-intro { margin: 20px auto; }
+.name-input-wrap { margin-bottom: 20px; }
+.name-input-wrap label { display: block; font-size: 14px; font-weight: bold; color: #534AB7; margin-bottom: 8px; }
+.name-input { width: 100%; padding: 14px 16px; font-size: 18px; border: 3px solid #AFA9EC; border-radius: 14px; font-family: Arial, sans-serif; outline: none; text-align: center; }
+.name-input:focus { border-color: #534AB7; }
+.start-btn { background: #534AB7; color: #fff; border: none; border-radius: 14px; padding: 14px 32px; font-size: 18px; font-weight: bold; cursor: pointer; font-family: Arial, sans-serif; width: 100%; }
+.start-btn:hover { background: #3C3489; }
+
+/* GAME */
+.game-screen { display: none; }
+.hdr { text-align: center; background: #534AB7; border-radius: 16px; padding: 16px 12px 14px; margin-bottom: 14px; }
+.hdr-title { font-size: 20px; font-weight: bold; color: #fff; }
+.hdr-name { font-size: 13px; color: #CECBF6; margin-top: 3px; }
+.progress-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+.chip { border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: bold; }
+.chip.blue { background: #E6F1FB; color: #0C447C; }
+.chip.green { background: #EAF3DE; color: #27500A; }
+.chip.purple { background: #EEEDFE; color: #3C3489; }
+.progress-bar-wrap { background: #D3D1C7; border-radius: 8px; height: 8px; margin-bottom: 14px; overflow: hidden; }
+.progress-bar-fill { height: 8px; background: #7F77DD; border-radius: 8px; transition: width 0.3s; }
+.chest-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 16px; }
+.chest-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; }
+.chest-tap { font-size: 14px; color: #854F0B; font-weight: bold; background: #FAEEDA; padding: 6px 18px; border-radius: 20px; border: 2px solid #EF9F27; }
+.word-card-area { display: flex; justify-content: center; margin-bottom: 16px; min-height: 160px; }
+.big-word-card { background: #fff; border: 3px solid #AFA9EC; border-radius: 20px; padding: 16px 28px; text-align: center; animation: popIn 0.35s ease; width: 100%; max-width: 320px; }
+@keyframes popIn { from { transform: scale(0.5) translateY(20px); opacity:0; } to { transform: scale(1) translateY(0); opacity:1; } }
+.big-word-text { font-size: 30px; font-weight: bold; color: #3C3489; margin-top: 8px; }
+.big-word-q { font-size: 13px; color: #888; margin-top: 4px; }
+.big-word-num { font-size: 12px; color: #aaa; margin-top: 2px; }
+.cat-btns { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+.cat-btn { border: none; border-radius: 14px; padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: Arial, sans-serif; transition: transform 0.12s; }
+.cat-btn:hover { transform: scale(1.04); }
+.cat-btn:active { transform: scale(0.97); }
+.cat-btn .btn-label { font-size: 14px; font-weight: bold; }
+.cat-btn .btn-hint { font-size: 11px; }
+.cat-btn.verb { background: #E6F1FB; } .cat-btn.verb .btn-label { color: #0C447C; } .cat-btn.verb .btn-hint { color: #185FA5; }
+.cat-btn.noun { background: #EAF3DE; } .cat-btn.noun .btn-label { color: #27500A; } .cat-btn.noun .btn-hint { color: #3B6D11; }
+.cat-btn.proper { background: #FBEAF0; } .cat-btn.proper .btn-label { color: #72243E; } .cat-btn.proper .btn-hint { color: #993556; }
+.cat-btn.adj { background: #EEEDFE; } .cat-btn.adj .btn-label { color: #3C3489; } .cat-btn.adj .btn-hint { color: #534AB7; }
+.feedback { text-align: center; border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: none; }
+.feedback.show { display: block; }
+.feedback.correct { background: #EAF3DE; color: #27500A; }
+.feedback.wrong { background: #FCEBEB; color: #791F1F; }
+
+/* RESULTS */
+.results-area { display: none; }
+.results-area.show { display: block; }
+.results-title { text-align: center; font-size: 18px; font-weight: bold; color: #3C3489; margin-bottom: 10px; }
+.results-grid { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.result-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.result-row.cor { background: #EAF3DE; color: #27500A; }
+.result-row.inc { background: #FCEBEB; color: #791F1F; }
+.result-row .rword { font-weight: bold; min-width: 70px; }
+.final-msg { text-align: center; border-radius: 14px; padding: 14px; font-size: 15px; font-weight: bold; margin-bottom: 12px; }
+.final-msg.perfect { background: #EEEDFE; color: #26215C; }
+.final-msg.great { background: #EAF3DE; color: #27500A; }
+.final-msg.ok { background: #FAEEDA; color: #633806; }
+.submit-status { text-align: center; font-size: 13px; color: #534AB7; margin-bottom: 10px; font-style: italic; }
+.btn-play-again { display: block; width: 100%; background: #7F77DD; color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: Arial, sans-serif; }
+.btn-play-again:hover { background: #534AB7; }
+</style>
+</head>
+<body>
+<div class="g">
+
+  <!-- NAME ENTRY SCREEN -->
+  <div class="name-screen" id="nameScreen">
+    <svg width="140" height="120" viewBox="0 0 160 130" fill="none" style="margin:0 auto 16px;display:block;">
+      <rect x="15" y="30" width="130" height="44" rx="10" fill="#BA7517" stroke="#633806" stroke-width="3"/>
+      <rect x="15" y="30" width="130" height="12" rx="6" fill="#EF9F27"/>
+      <rect x="55" y="38" width="50" height="8" rx="4" fill="#FAC775"/>
+      <rect x="68" y="54" width="24" height="14" rx="4" fill="#EF9F27" stroke="#633806" stroke-width="2"/>
+      <circle cx="80" cy="61" r="5" fill="#BA7517" stroke="#633806" stroke-width="1.5"/>
+      <rect x="15" y="72" width="130" height="52" rx="10" fill="#854F0B" stroke="#633806" stroke-width="3"/>
+      <rect x="15" y="72" width="130" height="12" fill="#6B3E08"/>
+      <rect x="70" y="72" width="20" height="52" fill="#6B3E08"/>
+      <rect x="60" y="88" width="40" height="22" rx="8" fill="#EF9F27" stroke="#633806" stroke-width="2"/>
+      <circle cx="80" cy="99" r="6" fill="#BA7517" stroke="#633806" stroke-width="1.5"/>
+    </svg>
+    <h1>Grammar Treasure Hunt</h1>
+    <p>Type your name to start the adventure!</p>
+    <div class="name-input-wrap">
+      <label>What is your name?</label>
+      <input class="name-input" id="nameInput" type="text" placeholder="Type your name here..." maxlength="40" />
+    </div>
+    <button class="start-btn" onclick="startGame()">Open the Chest!</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="game-screen" id="gameScreen">
+    <div class="hdr">
+      <div class="hdr-title">Grammar Treasure Hunt</div>
+      <div class="hdr-name" id="playerName"></div>
+    </div>
+    <div class="progress-row">
+      <div class="chip blue">Score: <span id="sv">0</span> / 16</div>
+      <div class="chip green">Word: <span id="wnum">0</span> / 16</div>
+      <div class="chip purple" id="streakchip">Streak: 0</div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
+
+    <div class="chest-area">
+      <button class="chest-btn" id="chestBtn" onclick="openChest()">
+        <svg width="160" height="130" viewBox="0 0 160 130" fill="none">
+          <g id="chestLidG" style="transform-origin:80px 72px;transition:transform 0.5s ease;">
+            <rect x="15" y="30" width="130" height="44" rx="10" fill="#BA7517" stroke="#633806" stroke-width="3"/>
+            <rect x="15" y="30" width="130" height="12" rx="6" fill="#EF9F27"/>
+            <rect x="55" y="38" width="50" height="8" rx="4" fill="#FAC775"/>
+            <rect x="68" y="54" width="24" height="14" rx="4" fill="#EF9F27" stroke="#633806" stroke-width="2"/>
+            <circle cx="80" cy="61" r="5" fill="#BA7517" stroke="#633806" stroke-width="1.5"/>
+          </g>
+          <rect x="15" y="72" width="130" height="52" rx="10" fill="#854F0B" stroke="#633806" stroke-width="3"/>
+          <rect x="15" y="72" width="130" height="12" fill="#6B3E08"/>
+          <rect x="70" y="72" width="20" height="52" fill="#6B3E08"/>
+          <rect x="60" y="88" width="40" height="22" rx="8" fill="#EF9F27" stroke="#633806" stroke-width="2"/>
+          <circle cx="80" cy="99" r="6" fill="#BA7517" stroke="#633806" stroke-width="1.5"/>
+        </svg>
+        <div class="chest-tap" id="chestLabel">Tap to open the chest!</div>
+      </button>
+    </div>
+
+    <div class="word-card-area" id="wordCardArea"></div>
+    <div class="feedback" id="feedback"></div>
+
+    <div class="cat-btns" id="catBtns" style="display:none;">
+      <button class="cat-btn verb" onclick="answer('verb')">
+        <svg width="40" height="40" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#185FA5"/><line x1="30" y1="22" x2="30" y2="38" stroke="#185FA5" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="28" x2="18" y2="36" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="28" x2="42" y2="24" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="20" y2="48" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="42" y2="44" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/></svg>
+        <span class="btn-label">Verb</span><span class="btn-hint">Action word</span>
+      </button>
+      <button class="cat-btn noun" onclick="answer('noun')">
+        <svg width="40" height="40" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#C0DD97"/><ellipse cx="30" cy="36" rx="16" ry="12" fill="#639922"/><ellipse cx="20" cy="24" rx="7" ry="7" fill="#639922"/><ellipse cx="40" cy="24" rx="7" ry="7" fill="#639922"/><circle cx="20" cy="22" r="4" fill="#fff"/><circle cx="40" cy="22" r="4" fill="#fff"/><circle cx="21" cy="22" r="2" fill="#27500A"/><circle cx="41" cy="22" r="2" fill="#27500A"/><path d="M22 42 Q30 48 38 42" stroke="#27500A" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <span class="btn-label">Noun</span><span class="btn-hint">Person, place, thing</span>
+      </button>
+      <button class="cat-btn proper" onclick="answer('proper')">
+        <svg width="40" height="40" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#F4C0D1"/><polygon points="20,6 23,15 33,15 25,21 28,30 20,24 12,30 15,21 7,15 17,15" fill="#D4537E"/></svg>
+        <span class="btn-label">Proper noun</span><span class="btn-hint">Specific name</span>
+      </button>
+      <button class="cat-btn adj" onclick="answer('adj')">
+        <svg width="40" height="40" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#CECBF6"/><circle cx="30" cy="30" r="10" fill="#fff" stroke="#7F77DD" stroke-width="2"/><circle cx="30" cy="30" r="6" fill="#7F77DD"/><circle cx="30" cy="8" r="3" fill="#E24B4A"/><circle cx="52" cy="30" r="3" fill="#EF9F27"/><circle cx="30" cy="52" r="3" fill="#639922"/><circle cx="8" cy="30" r="3" fill="#185FA5"/></svg>
+        <span class="btn-label">Adjective</span><span class="btn-hint">Describing word</span>
+      </button>
+    </div>
+
+    <div class="results-area" id="resultsArea">
+      <div class="results-title">Your results!</div>
+      <div class="results-grid" id="resultsGrid"></div>
+      <div class="final-msg" id="finalMsg"></div>
+      <div class="submit-status" id="submitStatus"></div>
+      <button class="btn-play-again" onclick="resetGame()">Play again!</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzcjWJYwlvJoJ_ozvthknLMeeWTcUyAKE_LuIxepopGIFI4I915cJBsGGuXC3GIQZYtNA/exec';
+const DAY = 'Monday';
+const catNames = {verb:'Verb',noun:'Noun',proper:'Proper noun',adj:'Adjective'};
+let studentName = '';
+
+function runnerSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#185FA5"/><line x1="30" y1="22" x2="30" y2="38" stroke="#185FA5" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="28" x2="18" y2="36" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="28" x2="42" y2="24" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="20" y2="48" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="38" x2="42" y2="44" stroke="#185FA5" stroke-width="4" stroke-linecap="round"/></svg>`;}
+function swimSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#B5D4F4"/><circle cx="30" cy="16" r="6" fill="#0C447C"/><ellipse cx="30" cy="32" rx="14" ry="6" fill="#0C447C"/><line x1="16" y1="32" x2="8" y2="28" stroke="#0C447C" stroke-width="4" stroke-linecap="round"/><line x1="44" y1="32" x2="52" y2="36" stroke="#0C447C" stroke-width="4" stroke-linecap="round"/><path d="M10 42 Q20 38 30 42 Q40 46 50 42" stroke="#185FA5" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;}
+function jumpSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#C0DD97"/><circle cx="30" cy="14" r="6" fill="#27500A"/><line x1="30" y1="20" x2="30" y2="36" stroke="#27500A" stroke-width="5" stroke-linecap="round"/><line x1="30" y1="26" x2="18" y2="20" stroke="#27500A" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="26" x2="42" y2="20" stroke="#27500A" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="36" x2="22" y2="46" stroke="#27500A" stroke-width="4" stroke-linecap="round"/><line x1="30" y1="36" x2="38" y2="46" stroke="#27500A" stroke-width="4" stroke-linecap="round"/></svg>`;}
+function clapSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#F4C0D1"/><rect x="20" y="22" width="10" height="18" rx="5" fill="#D4537E" transform="rotate(-15 20 22)"/><rect x="30" y="22" width="10" height="18" rx="5" fill="#D4537E" transform="rotate(15 30 22)"/><ellipse cx="30" cy="40" rx="10" ry="6" fill="#ED93B1"/></svg>`;}
+function ballSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EAF3DE"/><circle cx="30" cy="30" r="18" fill="#fff" stroke="#3B6D11" stroke-width="2"/><path d="M30 12 Q36 20 36 30 Q36 40 30 48" stroke="#3B6D11" stroke-width="2" fill="none"/><path d="M12 30 Q20 24 30 24 Q40 24 48 30" stroke="#3B6D11" stroke-width="2" fill="none"/><path d="M12 30 Q20 36 30 36 Q40 36 48 30" stroke="#3B6D11" stroke-width="2" fill="none"/></svg>`;}
+function catSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><ellipse cx="30" cy="35" rx="14" ry="12" fill="#EF9F27"/><circle cx="30" cy="25" r="10" fill="#EF9F27"/><polygon points="20,18 16,8 24,16" fill="#EF9F27"/><polygon points="40,18 44,8 36,16" fill="#EF9F27"/><circle cx="26" cy="24" r="2.5" fill="#27500A"/><circle cx="34" cy="24" r="2.5" fill="#27500A"/><ellipse cx="30" cy="28" rx="3" ry="2" fill="#F0997B"/><line x1="20" y1="27" x2="10" y2="25" stroke="#854F0B" stroke-width="1.5"/><line x1="40" y1="27" x2="50" y2="25" stroke="#854F0B" stroke-width="1.5"/></svg>`;}
+function frogSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#C0DD97"/><ellipse cx="30" cy="36" rx="16" ry="12" fill="#639922"/><ellipse cx="20" cy="24" rx="7" ry="7" fill="#639922"/><ellipse cx="40" cy="24" rx="7" ry="7" fill="#639922"/><circle cx="20" cy="22" r="4" fill="#fff"/><circle cx="40" cy="22" r="4" fill="#fff"/><circle cx="21" cy="22" r="2" fill="#27500A"/><circle cx="41" cy="22" r="2" fill="#27500A"/><path d="M22 42 Q30 48 38 42" stroke="#27500A" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;}
+function cloudSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#E6F1FB"/><ellipse cx="30" cy="34" rx="18" ry="10" fill="#fff"/><circle cx="22" cy="30" r="9" fill="#fff"/><circle cx="34" cy="27" r="11" fill="#fff"/><circle cx="44" cy="32" r="7" fill="#fff"/></svg>`;}
+function girlSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FBEAF0"/><circle cx="30" cy="20" r="9" fill="#F0997B"/><path d="M18 20 Q18 10 30 10 Q42 10 42 20" fill="#D4537E"/><rect x="18" y="30" width="24" height="18" rx="6" fill="#D4537E"/><rect x="18" y="44" width="8" height="8" rx="3" fill="#F0997B"/><rect x="34" y="44" width="8" height="8" rx="3" fill="#F0997B"/><circle cx="27" cy="20" r="1.5" fill="#3C3489"/><circle cx="33" cy="20" r="1.5" fill="#3C3489"/></svg>`;}
+function boySVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#E6F1FB"/><circle cx="30" cy="20" r="9" fill="#F0997B"/><path d="M18 14 Q18 8 30 8 Q42 8 42 14 L42 18 Q38 12 30 12 Q22 12 18 18 Z" fill="#185FA5"/><rect x="18" y="30" width="24" height="18" rx="6" fill="#185FA5"/><rect x="18" y="44" width="8" height="8" rx="3" fill="#F0997B"/><rect x="34" y="44" width="8" height="8" rx="3" fill="#F0997B"/><circle cx="27" cy="20" r="1.5" fill="#3C3489"/><circle cx="33" cy="20" r="1.5" fill="#3C3489"/></svg>`;}
+function calSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><rect x="12" y="16" width="36" height="30" rx="5" fill="#7F77DD"/><rect x="12" y="16" width="36" height="12" rx="5" fill="#534AB7"/><circle cx="22" cy="14" r="3" fill="#3C3489"/><circle cx="38" cy="14" r="3" fill="#3C3489"/><rect x="18" y="32" width="6" height="5" rx="1" fill="#fff"/><rect x="27" y="32" width="6" height="5" rx="1" fill="#fff"/><rect x="36" y="32" width="6" height="5" rx="1" fill="#CECBF6"/></svg>`;}
+function citySVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAC775"/><rect x="8" y="30" width="12" height="22" fill="#534AB7"/><rect x="22" y="22" width="16" height="30" fill="#7F77DD"/><rect x="40" y="26" width="12" height="26" fill="#534AB7"/><rect x="25" y="26" width="4" height="4" fill="#FAC775"/><rect x="31" y="26" width="4" height="4" fill="#FAC775"/><rect x="26" y="42" width="8" height="10" fill="#EEEDFE"/><line x1="30" y1="14" x2="30" y2="22" stroke="#E24B4A" stroke-width="2"/><polygon points="27,14 33,14 30,8" fill="#E24B4A"/></svg>`;}
+function sunSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><circle cx="30" cy="30" r="12" fill="#EF9F27"/><line x1="30" y1="10" x2="30" y2="6" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="50" x2="30" y2="54" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="10" y1="30" x2="6" y2="30" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="30" x2="54" y2="30" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="16" x2="13" y2="13" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="44" y1="44" x2="47" y2="47" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="44" y1="16" x2="47" y2="13" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="44" x2="13" y2="47" stroke="#EF9F27" stroke-width="3" stroke-linecap="round"/></svg>`;}
+function sheepSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#EEEDFE"/><ellipse cx="30" cy="34" rx="16" ry="12" fill="#fff" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="22" cy="26" r="7" fill="#fff" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="38" cy="26" r="7" fill="#fff" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="30" cy="22" r="7" fill="#fff" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="28" cy="23" r="1.5" fill="#2C2C2A"/><circle cx="32" cy="23" r="1.5" fill="#2C2C2A"/><rect x="20" y="44" width="5" height="8" rx="2" fill="#888780"/><rect x="35" y="44" width="5" height="8" rx="2" fill="#888780"/></svg>`;}
+function boltSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FAEEDA"/><polygon points="34,10 20,32 30,32 26,50 40,28 30,28" fill="#EF9F27" stroke="#BA7517" stroke-width="1.5" stroke-linejoin="round"/></svg>`;}
+function elephantSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#D3D1C7"/><ellipse cx="30" cy="36" rx="18" ry="14" fill="#888780"/><circle cx="30" cy="22" r="12" fill="#888780"/><ellipse cx="18" cy="20" rx="6" ry="8" fill="#888780"/><ellipse cx="42" cy="20" rx="6" ry="8" fill="#888780"/><ellipse cx="18" cy="20" rx="4" ry="6" fill="#F4C0D1"/><ellipse cx="42" cy="20" rx="4" ry="6" fill="#F4C0D1"/><circle cx="26" cy="21" r="2" fill="#2C2C2A"/><circle cx="34" cy="21" r="2" fill="#2C2C2A"/><path d="M30 38 Q26 44 28 50" stroke="#6F6E6A" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;}
+
+const wordIcons={Run:runnerSVG,Swim:swimSVG,Jump:jumpSVG,Clap:clapSVG,Ball:ballSVG,Cat:catSVG,Frog:frogSVG,Cloud:cloudSVG,Sara:girlSVG,Ahmed:boySVG,Monday:calSVG,Dubai:citySVG,Bright:sunSVG,Fluffy:sheepSVG,Fast:boltSVG,Big:elephantSVG};
+const words=[{word:'Run',cat:'verb'},{word:'Swim',cat:'verb'},{word:'Jump',cat:'verb'},{word:'Clap',cat:'verb'},{word:'Ball',cat:'noun'},{word:'Cat',cat:'noun'},{word:'Frog',cat:'noun'},{word:'Cloud',cat:'noun'},{word:'Sara',cat:'proper'},{word:'Ahmed',cat:'proper'},{word:'Monday',cat:'proper'},{word:'Dubai',cat:'proper'},{word:'Bright',cat:'adj'},{word:'Fluffy',cat:'adj'},{word:'Fast',cat:'adj'},{word:'Big',cat:'adj'}];
+
+let queue=[],current=null,idx=0,score=0,streak=0,answers=[],chestOpen=false,waitingNext=false;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(){
+  const n = document.getElementById('nameInput').value.trim();
+  if(!n){ alert('Please type your name first!'); return; }
+  studentName = n;
+  document.getElementById('nameScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('playerName').textContent = 'Playing as: ' + studentName;
+  queue = shuffle(words);
+}
+
+function openChest(){
+  if(chestOpen)return;
+  chestOpen=true;
+  document.getElementById('chestLidG').style.transform='rotateX(55deg)';
+  document.getElementById('chestLabel').textContent='The chest is open!';
+  document.getElementById('chestBtn').style.cursor='default';
+  document.getElementById('chestBtn').onclick=null;
+  setTimeout(showNextWord,600);
+}
+
+function showNextWord(){
+  if(idx>=queue.length){showResults();return;}
+  current=queue[idx];waitingNext=false;
+  const icon=wordIcons[current.word]?wordIcons[current.word](80):'';
+  document.getElementById('wordCardArea').innerHTML=`<div class="big-word-card">${icon}<div class="big-word-text">${current.word}</div><div class="big-word-q">What type of word is this?</div><div class="big-word-num">Word ${idx+1} of ${queue.length}</div></div>`;
+  document.getElementById('catBtns').style.display='grid';
+  document.getElementById('feedback').classList.remove('show');
+  updateProgress();
+}
+
+function answer(cat){
+  if(waitingNext)return;
+  waitingNext=true;
+  const correct=cat===current.cat;
+  if(correct){score++;streak++;}else{streak=0;}
+  answers.push({word:current.word,chosen:cat,correct:current.cat,isCorrect:correct});
+  idx++;
+  document.getElementById('sv').textContent=score;
+  document.getElementById('streakchip').textContent='Streak: '+streak;
+  updateProgress();
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(correct?'correct':'wrong');
+  fb.textContent=correct?(streak>=3?streak+' in a row! '+current.word+' is a '+catNames[current.cat]+'!':'Correct! '+current.word+' is a '+catNames[current.cat]+'!'):('Not quite! '+current.word+' is a '+catNames[current.cat]+'. Keep going!');
+  document.getElementById('catBtns').style.display='none';
+  setTimeout(()=>{if(idx>=queue.length){showResults();}else{showNextWord();}},1600);
+}
+
+function updateProgress(){
+  document.getElementById('wnum').textContent=idx;
+  document.getElementById('pbar').style.width=Math.round((idx/queue.length)*100)+'%';
+}
+
+function showResults(){
+  document.getElementById('wordCardArea').innerHTML='';
+  document.getElementById('catBtns').style.display='none';
+  document.getElementById('feedback').classList.remove('show');
+  const grid=document.getElementById('resultsGrid');
+  grid.innerHTML='';
+  answers.forEach(a=>{
+    const row=document.createElement('div');
+    row.className='result-row '+(a.isCorrect?'cor':'inc');
+    const icon=wordIcons[a.word]?wordIcons[a.word](28):'';
+    row.innerHTML=`${icon}<span class="rword">${a.word}</span><span>${a.isCorrect?'Correct! '+catNames[a.correct]:'Should be '+catNames[a.correct]}</span>`;
+    grid.appendChild(row);
+  });
+  const msg=document.getElementById('finalMsg');
+  const pct=Math.round((score/queue.length)*100);
+  if(score===16){msg.className='final-msg perfect';msg.textContent='Perfect score! You are a grammar superstar!';}
+  else if(pct>=75){msg.className='final-msg great';msg.textContent='Fantastic! '+score+' out of 16! So close to perfect!';}
+  else{msg.className='final-msg ok';msg.textContent='Good try! '+score+' out of 16. Play again and beat your score!';}
+  document.getElementById('resultsArea').classList.add('show');
+  submitResults();
+}
+
+function submitResults(){
+  const details = answers.map(a=>a.word+':'+(a.isCorrect?'correct':'wrong')).join(', ');
+  const pct = Math.round((score/words.length)*100);
+  const payload = {
+    day: DAY,
+    name: studentName,
+    score: score,
+    total: words.length,
+    percentage: pct,
+    details: details
+  };
+  document.getElementById('submitStatus').textContent = 'Sending results to your teacher...';
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(()=>{
+    document.getElementById('submitStatus').textContent = 'Results sent to your teacher!';
+  }).catch(()=>{
+    document.getElementById('submitStatus').textContent = 'Could not send results. Please tell your teacher your score: '+score+'/16';
+  });
+}
+
+function resetGame(){
+  queue=shuffle(words);idx=0;score=0;streak=0;answers=[];chestOpen=false;waitingNext=false;
+  document.getElementById('chestLidG').style.transform='';
+  document.getElementById('chestLabel').textContent='Tap to open the chest!';
+  document.getElementById('chestBtn').style.cursor='pointer';
+  document.getElementById('chestBtn').onclick=openChest;
+  document.getElementById('wordCardArea').innerHTML='';
+  document.getElementById('catBtns').style.display='none';
+  document.getElementById('feedback').classList.remove('show');
+  document.getElementById('resultsArea').classList.remove('show');
+  document.getElementById('sv').textContent=0;
+  document.getElementById('wnum').textContent=0;
+  document.getElementById('streakchip').textContent='Streak: 0';
+  document.getElementById('pbar').style.width='0%';
+  document.getElementById('submitStatus').textContent='';
+}
+</script>
+</body>
+</html>
