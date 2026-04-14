@@ -1002,11 +1002,11 @@ function submitStory(){
   } catch(e) {}
 
   const wednesdayPayload={day:DAY,name:studentName,score:1,total:1,percentage:100,details:`Title:${title} | ${details}`};
-  console.log('[Wednesday] Sending payload:', JSON.stringify(wednesdayPayload));
+  document.getElementById('submitLabel').textContent='⏳ Sending to teacher...';
   fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
     body:JSON.stringify(wednesdayPayload)})
-    .then(r=>{console.log('[Wednesday] Fetch success, status:',r.status);document.getElementById('submitLabel').textContent='Story sent to your teacher! ✅';})
-    .catch(err=>{console.error('[Wednesday] Fetch error:',err);document.getElementById('submitLabel').textContent='Story saved! Please tell your teacher you finished! ✅';});
+    .then(r=>{document.getElementById('submitLabel').textContent='✅ Story sent to your teacher! (status '+r.status+')';})
+    .catch(err=>{document.getElementById('submitLabel').textContent='❌ Send failed: '+err.message;});
 }
 </script>
 </body>

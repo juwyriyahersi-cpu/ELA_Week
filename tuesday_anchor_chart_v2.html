@@ -642,11 +642,11 @@ function showChart(){
   } catch(e) {}
 
   const tuesdayPayload={day:DAY,name:studentName,score:totalScore,total:TOTAL_WORDS,percentage:pct,details};
-  console.log('[Tuesday] Sending payload:', JSON.stringify(tuesdayPayload));
+  gid('submitSt').textContent='⏳ Sending to teacher...';
   fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
     body:JSON.stringify(tuesdayPayload)})
-    .then(r=>{console.log('[Tuesday] Fetch success, status:',r.status);gid('submitSt').textContent='Results sent to your teacher! ✅';})
-    .catch(err=>{console.error('[Tuesday] Fetch error:',err);gid('submitSt').textContent='Results saved! Tell your teacher your score: '+totalScore+'/'+TOTAL_WORDS;});
+    .then(r=>{gid('submitSt').textContent='✅ Results sent to your teacher! (status '+r.status+')';})
+    .catch(err=>{gid('submitSt').textContent='❌ Send failed: '+err.message+' — tell teacher your score: '+totalScore+'/'+TOTAL_WORDS;});
 }
 
 function resetGame(){
