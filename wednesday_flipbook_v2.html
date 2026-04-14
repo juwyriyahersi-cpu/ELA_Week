@@ -1001,7 +1001,7 @@ function submitStory(){
     localStorage.setItem('ela_week_results', JSON.stringify(localData));
   } catch(e) {}
 
-  fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+  fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
     body:JSON.stringify({day:DAY,name:studentName,score:1,total:1,percentage:100,details:`Title:${title} | ${details}`,workHtml:'<p>Flipbook submitted</p>'})})
     .then(()=>{document.getElementById('submitLabel').textContent='Story sent to your teacher! ✅';})
     .catch(()=>{document.getElementById('submitLabel').textContent='Story saved! Please tell your teacher you finished! ✅';});

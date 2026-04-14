@@ -284,11 +284,10 @@ function submitResults(){
   document.getElementById('submitStatus').textContent = 'Sending results to your teacher...';
   fetch(WEB_APP_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
+    headers: {'Content-Type':'text/plain'},
     body: JSON.stringify(payload)
   }).then(()=>{
-    document.getElementById('submitStatus').textContent = 'Results sent to your teacher!';
+    document.getElementById('submitStatus').textContent = 'Results sent to your teacher! ✅';
   }).catch(()=>{
     document.getElementById('submitStatus').textContent = 'Could not send results. Please tell your teacher your score: '+score+'/16';
   });
