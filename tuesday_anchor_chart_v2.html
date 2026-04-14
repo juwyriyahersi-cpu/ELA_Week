@@ -641,10 +641,12 @@ function showChart(){
     localStorage.setItem('ela_week_results', JSON.stringify(localData));
   } catch(e) {}
 
+  const tuesdayPayload={day:DAY,name:studentName,score:totalScore,total:TOTAL_WORDS,percentage:pct,details};
+  console.log('[Tuesday] Sending payload:', JSON.stringify(tuesdayPayload));
   fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify({day:DAY,name:studentName,score:totalScore,total:TOTAL_WORDS,percentage:pct,details})})
-    .then(()=>{gid('submitSt').textContent='Results sent to your teacher! ✅';})
-    .catch(()=>{gid('submitSt').textContent='Results saved! Tell your teacher your score: '+totalScore+'/'+TOTAL_WORDS;});
+    body:JSON.stringify(tuesdayPayload)})
+    .then(r=>{console.log('[Tuesday] Fetch success, status:',r.status);gid('submitSt').textContent='Results sent to your teacher! ✅';})
+    .catch(err=>{console.error('[Tuesday] Fetch error:',err);gid('submitSt').textContent='Results saved! Tell your teacher your score: '+totalScore+'/'+TOTAL_WORDS;});
 }
 
 function resetGame(){
